@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bảng Điều Khiển Quản Lý Toàn Diện</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: The SPA is designed as a multi-section dashboard with a clear top navigation (Tổng Quan, Lớp Học, Kho Hàng, Bán Hàng, Tài Chính, Danh Mục, Phân Công, Nhân Sự, Học Viên, Kỳ Thi). This structure was chosen to logically separate distinct management areas, preventing information overload. Users can focus on a specific task (e.g., assessing students, checking inventory, managing catalogs) without distraction, while the 'Tổng Quan' dashboard provides a high-level summary for quick decision-making. Modals are used for all CRUD operations to maintain a clean main interface. -->
+    <!-- Visualization & Content Choices: Report Info: Student performance data -> Goal: Show class-wide performance distribution -> Viz/Method: Donut Chart (Chart.js) -> Interaction: Tooltips on hover provide exact numbers. Justification: Excellent for at-a-glance part-to-whole understanding. Report Info: Key financial and inventory levels -> Goal: Provide instant KPIs -> Viz/Method: Styled HTML Cards -> Interaction: N/A. Justification: Clear, immediate display of critical numbers. Report Info: Transactional, task & catalog data -> Goal: Allow detailed review and management -> Viz/Method: Sortable HTML Tables and Card Grids with CRUD buttons and progress bars -> Interaction: Buttons open Add/Edit/Delete modals. Justification: Standard, effective UI for data management. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #fdfaf6; color: #4a4a4a; }
+        .nav-link { transition: all 0.2s ease-in-out; border-bottom: 2px solid transparent; }
+        .nav-link.active { border-bottom-color: #a38560; color: #a38560; font-weight: 600; }
+        .chart-container { position: relative; width: 100%; max-width: 450px; margin-left: auto; margin-right: auto; height: 300px; max-height: 400px; }
+        @media (min-width: 768px) { .chart-container { height: 350px; } }
+        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-in-out; }
+        .accordion-content.open { max-height: 1500px; }
+        .modal { transition: opacity 0.25s ease; }
+        .modal-active { opacity: 1; pointer-events: auto; }
+        .modal-inactive { opacity: 0; pointer-events: none; }
+        .progress-bar { background-color: #e0d5c8; border-radius: 9999px; overflow: hidden; }
+        .progress-bar-inner { background-color: #a38560; height: 100%; border-radius: 9999px; transition: width 0.3s ease; }
+        .gemini-btn:disabled { background-color: #e0d5c8; cursor: not-allowed; }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="min-h-screen">
+        <header class="bg-white shadow-sm sticky top-0 z-20">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center py-4">
+                    <h1 class="text-2xl font-bold text-[#6b5b4b]">Hệ Thống Quản Lý</h1>
+                    <nav class="hidden lg:flex space-x-3 text-sm">
+                        <a href="#tongquan" class="nav-link active text-gray-600 hover:text-[#a38560] py-2">Tổng Quan</a>
+                        <a href="#lophoc" class="nav-link text-gray-600 hover:text-[#a38560] py-2">Lớp Học</a>
+                        <a href="#hocvien" class="nav-link text-gray-600 hover:text-[#a38560] py-2">Học Viên</a>
+                        <a href="#kythi" class="nav-link text-gray-600 hover:text-[#a38560] py-2">Kỳ Thi</a>
+                        <a href="#phancong" class="nav-link text-gray-600 hover:text-[#a38560] py-2">Phân Công</a>
+                        <a href="#nhansu" class="nav-link text-gray-600 hover:text-[#a38560] py-2">Nhân Sự</a>
+                        <a href="#khohang" class="nav-link text-gray-600 hover:text-[#a38560] py-2">Kho Hàng</a>
+                        <a href="#banhang" class="nav-link text-gray-600 hover:text-[#a38560] py-2">Bán Hàng</a>
+                        <a href="#taichinh" class="nav-link text-gray-600 hover:text-[#a38560] py-2">Tài Chính</a>
+                        <a href="#danhmuc" class="nav-link text-gray-600 hover:text-[#a38560] py-2">Danh Mục</a>
+                    </nav>
+                    <div class="lg:hidden">
+                         <select id="mobile-nav" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                            <option value="#tongquan">Tổng Quan</option>
+                            <option value="#lophoc">Lớp Học</option>
+                            <option value="#hocvien">Học Viên</option>
+                            <option value="#kythi">Kỳ Thi</option>
+                            <option value="#phancong">Phân Công</option>
+                            <option value="#nhansu">Nhân Sự</option>
+                            <option value="#khohang">Kho Hàng</option>
+                            <option value="#banhang">Bán Hàng</option>
+                            <option value="#taichinh">Tài Chính</option>
+                            <option value="#danhmuc">Danh Mục</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="container mx-auto p-4 sm:p-6 lg:p-8">
+            <!-- Section: Tổng Quan -->
+            <section id="tongquan" class="page-section">
+                <div class="text-center mb-8"><h2 class="text-3xl font-bold text-[#a38560]">Bảng Điều Khiển Tổng Quan</h2><p class="mt-2 text-lg text-gray-600">Tổng hợp các chỉ số quan trọng về lớp học, kho hàng và tài chính.</p></div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 p-6 bg-white rounded-2xl shadow-md border border-gray-200"><h3 class="text-xl font-semibold text-center text-[#6b5b4b] mb-4">Tổng Quan Hiệu Suất Hệ Thống</h3><div class="chart-container"><canvas id="summaryChart"></canvas></div></div>
+                    <div class="space-y-6">
+                        <div class="p-6 bg-white rounded-2xl shadow-md border border-gray-200"><h3 class="text-xl font-semibold text-[#6b5b4b] mb-2">Thống Kê Bán Hàng</h3><div id="dashboard-sales-stats" class="space-y-2"></div></div>
+                        <div class="p-6 bg-white rounded-2xl shadow-md border border-gray-200"><h3 class="text-xl font-semibold text-[#6b5b4b] mb-2">Thống Kê Cho Mượn</h3><div id="dashboard-loan-stats" class="space-y-2"></div></div>
+                        <div class="p-6 bg-white rounded-2xl shadow-md border border-gray-200"><h3 class="text-xl font-semibold text-[#6b5b4b] mb-2">Tài Chính</h3><div id="financial-summary" class="space-y-2"></div></div>
+                        <div class="p-6 bg-white rounded-2xl shadow-md border border-gray-200"><h3 class="text-xl font-semibold text-[#6b5b4b] mb-2">Tồn Kho</h3><div id="inventory-summary" class="space-y-2"></div></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section: Lớp Học -->
+            <section id="lophoc" class="page-section hidden">
+                 <div class="text-center mb-8"><h2 class="text-3xl font-bold text-[#a38560]">Quản Lý Lớp Học</h2><p class="mt-2 text-lg text-gray-600">Theo dõi và đánh giá hạnh kiểm của võ sinh theo từng hoạt động.</p></div>
+                <div class="bg-white rounded-2xl shadow-md border border-gray-200 p-4 sm:p-6">
+                    <div class="flex justify-between items-center mb-4"><h3 class="text-xl font-semibold text-[#6b5b4b]">Chương Trình</h3><button id="add-schedule-btn" class="bg-[#a38560] text-white px-4 py-2 rounded-lg hover:bg-[#6b5b4b] transition">Thêm Hoạt Động</button></div>
+                    <div id="class-accordion" class="space-y-3"></div>
+                </div>
+            </section>
+
+            <!-- Section: Học Viên -->
+            <section id="hocvien" class="page-section hidden">
+                <div class="text-center mb-8"><h2 class="text-3xl font-bold text-[#a38560]">Quản Lý Học Viên</h2><p class="mt-2 text-lg text-gray-600">Danh sách và thông tin chi tiết của các học viên.</p></div>
+                <div class="bg-white rounded-2xl shadow-md border border-gray-200 p-4 sm:p-6">
+                    <div class="flex justify-between items-center mb-4"><h3 class="text-xl font-semibold text-[#6b5b4b]">Danh Sách Học Viên</h3><button id="add-student-btn" class="bg-[#a38560] text-white px-4 py-2 rounded-lg hover:bg-[#6b5b4b] transition">Thêm Học Viên</button></div>
+                    <div id="student-cards-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+                </div>
+            </section>
+
+            <!-- Section: Kỳ Thi -->
+            <section id="kythi" class="page-section hidden">
+                <div class="text-center mb-8"><h2 class="text-3xl font-bold text-[#a38560]">Quản Lý Kỳ Thi</h2><p class="mt-2 text-lg text-gray-600">Theo dõi các kỳ thi thăng đai, đấu giải và biểu diễn.</p></div>
+                <div class="space-y-12">
+                    <div class="bg-white rounded-2xl shadow-md border border-gray-200 p-4 sm:p-6">
+                        <div class="flex justify-between items-center mb-4"><h3 class="text-xl font-semibold text-[#6b5b4b]">Điểm Danh & Lệ Phí Kỳ Thi</h3><button class="add-exam-btn bg-[#a38560] text-white px-4 py-2 rounded-lg" data-type="examAttendance">Thêm Điểm Danh</button></div>
+                        <div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr><th>STT</th><th>Ngày</th><th>Học Viên</th><th>Tuổi</th><th>Điểm Danh</th><th>Lệ Phí</th><th>Tình Trạng</th><th></th></tr></thead><tbody id="exam-attendance-table"></tbody></table></div>
+                    </div>
+                    <div class="bg-white rounded-2xl shadow-md border border-gray-200 p-4 sm:p-6">
+                        <div class="flex justify-between items-center mb-4"><h3 class="text-xl font-semibold text-[#6b5b4b]">Kỳ Thi Thăng Đai</h3><button class="add-exam-btn bg-[#a38560] text-white px-4 py-2 rounded-lg" data-type="beltExam">Thêm Kỳ Thi</button></div>
+                        <div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr><th>STT</th><th>Ngày Thi</th><th>Học Viên</th><th>Tuổi</th><th>Cấp Đai</th><th>Kết Quả</th><th>Văn Bằng</th><th></th></tr></thead><tbody id="belt-exam-table"></tbody></table></div>
+                    </div>
+                    <div class="bg-white rounded-2xl shadow-md border border-gray-200 p-4 sm:p-6">
+                        <div class="flex justify-between items-center mb-4"><h3 class="text-xl font-semibold text-[#6b5b4b]">Kỳ Thi Đấu Giải</h3><button class="add-exam-btn bg-[#a38560] text-white px-4 py-2 rounded-lg" data-type="tournament">Thêm Giải Đấu</button></div>
+                        <div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr><th>STT</th><th>Ngày Thi</th><th>Học Viên</th><th>Tuổi</th><th>Nội Dung</th><th>Kết Quả</th><th>Văn Bằng</th><th></th></tr></thead><tbody id="tournament-table"></tbody></table></div>
+                    </div>
+                    <div class="bg-white rounded-2xl shadow-md border border-gray-200 p-4 sm:p-6">
+                        <div class="flex justify-between items-center mb-4"><h3 class="text-xl font-semibold text-[#6b5b4b]">Buổi Biểu Diễn</h3><button class="add-exam-btn bg-[#a38560] text-white px-4 py-2 rounded-lg" data-type="demonstration">Thêm Biểu Diễn</button></div>
+                        <div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr><th>STT</th><th>Ngày Thi</th><th>Học Viên</th><th>Tuổi</th><th>Nội Dung</th><th>Kết Quả</th><th>Văn Bằng</th><th></th></tr></thead><tbody id="demonstration-table"></tbody></table></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section: Phân Công -->
+            <section id="phancong" class="page-section hidden">
+                <div class="text-center mb-8"><h2 class="text-3xl font-bold text-[#a38560]">Phân Công Nhiệm Vụ</h2><p class="mt-2 text-lg text-gray-600">Theo dõi tiến độ và trạng thái các công việc được phân công.</p></div>
+                <div class="bg-white rounded-2xl shadow-md border border-gray-200 p-4 sm:p-6 space-y-8">
+                    <div><h3 class="text-xl font-semibold text-[#6b5b4b] mb-4">Thống Kê Tiến Độ</h3><div id="task-stats-container" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div></div>
+                    <div><div class="flex justify-between items-center mb-4"><h3 class="text-xl font-semibold text-[#6b5b4b]">Danh Sách Nhiệm Vụ</h3><button id="add-task-btn" class="bg-[#a38560] text-white px-4 py-2 rounded-lg hover:bg-[#6b5b4b] transition">Thêm Nhiệm Vụ</button></div><div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/5">Nhiệm Vụ</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-2/5">Mô Tả</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng Thái</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/5">Hoàn Thành</th><th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Hành Động</th></tr></thead><tbody id="task-table" class="bg-white divide-y divide-gray-200"></tbody></table></div></div>
+                </div>
+            </section>
+            
+            <!-- Section: Nhân Sự -->
+            <section id="nhansu" class="page-section hidden">
+                <div class="text-center mb-8"><h2 class="text-3xl font-bold text-[#a38560]">Quản Lý Nhân Sự</h2><p class="mt-2 text-lg text-gray-600">Danh sách và thông tin chi tiết của các nhân sự.</p></div>
+                <div class="bg-white rounded-2xl shadow-md border border-gray-200 p-4 sm:p-6">
+                    <div class="flex justify-between items-center mb-4"><h3 class="text-xl font-semibold text-[#6b5b4b]">Danh Sách Nhân Sự</h3><button id="add-personnel-btn" class="bg-[#a38560] text-white px-4 py-2 rounded-lg hover:bg-[#6b5b4b] transition">Thêm Nhân Sự</button></div>
+                    <div id="personnel-cards-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+                </div>
+            </section>
+
+            <!-- Section: Kho Hàng -->
+            <section id="khohang" class="page-section hidden">
+                <div class="text-center mb-8"><h2 class="text-3xl font-bold text-[#a38560]">Quản Lý Kho Hàng</h2><p class="mt-2 text-lg text-gray-600">Theo dõi số lượng tồn kho và lịch sử giao dịch của các mặt hàng.</p></div>
+                <div class="bg-white rounded-2xl shadow-md border border-gray-200 p-4 sm:p-6 space-y-8">
+                    <div><h3 class="text-xl font-semibold text-[#6b5b4b] mb-4">Bảng Tồn Kho</h3><div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên Hàng</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tồn Kho 1</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tồn Kho 2</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tổng Tồn</th></tr></thead><tbody id="inventory-table" class="bg-white divide-y divide-gray-200"></tbody></table></div></div>
+                    <div><h3 class="text-xl font-semibold text-[#6b5b4b] mb-4">Thống Kê Hàng Cho Mượn</h3><div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày Mượn</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hàng Hóa</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Số Lượng</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Khách Hàng</th></tr></thead><tbody id="loan-table" class="bg-white divide-y divide-gray-200"></tbody></table></div></div>
+                    <div><div class="flex justify-between items-center mb-4"><h3 class="text-xl font-semibold text-[#6b5b4b]">Lịch Sử Giao Dịch Kho</h3><button id="add-inventory-tx-btn" class="bg-[#a38560] text-white px-4 py-2 rounded-lg hover:bg-[#6b5b4b] transition">Thêm Giao Dịch</button></div><div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Loại GD</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hàng Hóa</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Số Lượng</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kho/Khách Hàng</th><th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Hành Động</th></tr></thead><tbody id="inventory-tx-table" class="bg-white divide-y divide-gray-200"></tbody></table></div></div>
+                </div>
+            </section>
+            
+            <!-- Section: Bán Hàng -->
+            <section id="banhang" class="page-section hidden">
+                <div class="text-center mb-8"><h2 class="text-3xl font-bold text-[#a38560]">Quản Lý Bán Hàng</h2><p class="mt-2 text-lg text-gray-600">Tạo đơn hàng mới và theo dõi lịch sử bán hàng.</p></div>
+                <div class="bg-white rounded-2xl shadow-md border border-gray-200 p-4 sm:p-6 space-y-8">
+                    <div><h3 class="text-xl font-semibold text-[#6b5b4b] mb-4">Thống Kê Bán Hàng</h3><div id="sales-stats" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-center"></div></div>
+                    <div><div class="flex justify-between items-center mb-4"><h3 class="text-xl font-semibold text-[#6b5b4b]">Lịch Sử Đơn Hàng</h3><div class="space-x-2"><button id="add-gift-btn" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">Tặng Hàng</button><button id="add-sale-btn" class="bg-[#a38560] text-white px-4 py-2 rounded-lg hover:bg-[#6b5b4b] transition">Tạo Đơn Hàng</button></div></div><div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã ĐH</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Khách Hàng</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tổng Tiền</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Thanh Toán Vào</th><th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Hành Động</th></tr></thead><tbody id="sales-table" class="bg-white divide-y divide-gray-200"></tbody></table></div></div>
+                </div>
+            </section>
+
+            <!-- Section: Tài Chính -->
+            <section id="taichinh" class="page-section hidden">
+                 <div class="text-center mb-8"><h2 class="text-3xl font-bold text-[#a38560]">Quản Lý Tài Chính</h2><p class="mt-2 text-lg text-gray-600">Ghi nhận và theo dõi các giao dịch thu chi trên các tài khoản.</p></div>
+                <div class="bg-white rounded-2xl shadow-md border border-gray-200 p-4 sm:p-6 space-y-8">
+                    <div><h3 class="text-xl font-semibold text-[#6b5b4b] mb-4">Thống Kê Tài Khoản</h3><div id="finance-stats" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div></div>
+                    <div><div class="flex justify-between items-center mb-4"><h3 class="text-xl font-semibold text-[#6b5b4b]">Lịch Sử Giao Dịch Tài Chính</h3><button id="add-finance-tx-btn" class="bg-[#a38560] text-white px-4 py-2 rounded-lg hover:bg-[#6b5b4b] transition">Thêm Giao Dịch</button></div><div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Loại GD</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Số Tiền</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tài Khoản</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nội Dung</th><th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Hành Động</th></tr></thead><tbody id="finance-table" class="bg-white divide-y divide-gray-200"></tbody></table></div></div>
+                </div>
+            </section>
+            
+            <!-- Section: Danh Mục -->
+            <section id="danhmuc" class="page-section hidden">
+                <div class="text-center mb-8"><h2 class="text-3xl font-bold text-[#a38560]">Quản Lý Danh Mục</h2><p class="mt-2 text-lg text-gray-600">Quản lý các danh sách nền tảng của hệ thống.</p></div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="bg-white rounded-2xl shadow-md border border-gray-200 p-4 sm:p-6">
+                        <div class="flex justify-between items-center mb-4"><h3 class="text-xl font-semibold text-[#6b5b4b]">Sản Phẩm</h3><button class="add-catalog-btn bg-[#a38560] text-white px-3 py-1 rounded-lg text-sm" data-type="product">Thêm Mới</button></div>
+                        <div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr><th>Tên</th><th>Giá Bán</th><th></th></tr></thead><tbody id="product-catalog-table"></tbody></table></div>
+                    </div>
+                    <div class="bg-white rounded-2xl shadow-md border border-gray-200 p-4 sm:p-6">
+                        <div class="flex justify-between items-center mb-4"><h3 class="text-xl font-semibold text-[#6b5b4b]">Tài Khoản</h3><button class="add-catalog-btn bg-[#a38560] text-white px-3 py-1 rounded-lg text-sm" data-type="account">Thêm Mới</button></div>
+                        <div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr><th>Tên Tài Khoản</th><th></th></tr></thead><tbody id="account-catalog-table"></tbody></table></div>
+                    </div>
+                    <div class="bg-white rounded-2xl shadow-md border border-gray-200 p-4 sm:p-6">
+                        <div class="flex justify-between items-center mb-4"><h3 class="text-xl font-semibold text-[#6b5b4b]">Kho Hàng</h3><button class="add-catalog-btn bg-[#a38560] text-white px-3 py-1 rounded-lg text-sm" data-type="warehouse">Thêm Mới</button></div>
+                        <div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr><th>Tên Kho</th><th></th></tr></thead><tbody id="warehouse-catalog-table"></tbody></table></div>
+                    </div>
+                    <div class="bg-white rounded-2xl shadow-md border border-gray-200 p-4 sm:p-6">
+                        <div class="flex justify-between items-center mb-4"><h3 class="text-xl font-semibold text-[#6b5b4b]">Tài Liệu</h3><button class="add-catalog-btn bg-[#a38560] text-white px-3 py-1 rounded-lg text-sm" data-type="document">Thêm Mới</button></div>
+                        <div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr><th>Nội Dung</th><th>Loại</th><th>Trạng Thái</th><th></th></tr></thead><tbody id="document-catalog-table"></tbody></table></div>
+                    </div>
+                     <div class="bg-white rounded-2xl shadow-md border border-gray-200 p-4 sm:p-6">
+                        <div class="flex justify-between items-center mb-4"><h3 class="text-xl font-semibold text-[#6b5b4b]">Liên Hệ</h3><button class="add-catalog-btn bg-[#a38560] text-white px-3 py-1 rounded-lg text-sm" data-type="contact">Thêm Mới</button></div>
+                        <div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr><th>Tên</th><th>Thông Tin</th><th>Trạng Thái</th><th></th></tr></thead><tbody id="contact-catalog-table"></tbody></table></div>
+                    </div>
+                     <div class="bg-white rounded-2xl shadow-md border border-gray-200 p-4 sm:p-6">
+                        <div class="flex justify-between items-center mb-4"><h3 class="text-xl font-semibold text-[#6b5b4b]">Công Việc</h3><button class="add-catalog-btn bg-[#a38560] text-white px-3 py-1 rounded-lg text-sm" data-type="job">Thêm Mới</button></div>
+                        <div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr><th>Nội Dung</th><th>Trạng Thái</th><th>Phụ Trách</th><th></th></tr></thead><tbody id="job-catalog-table"></tbody></table></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal -->
+    <div id="transaction-modal" class="modal modal-inactive fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30 p-4">
+        <div id="modal-content" class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <h3 id="modal-title" class="text-xl font-bold text-[#6b5b4b] mb-4">Giao Dịch</h3>
+            <form id="transaction-form">
+                <input type="hidden" id="tx-id"><input type="hidden" id="tx-type">
+                <div id="form-fields" class="space-y-4"></div>
+                <div class="mt-6 flex justify-end space-x-3">
+                    <button type="button" id="cancel-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300">Hủy</button>
+                    <button type="submit" class="bg-[#a38560] text-white px-4 py-2 rounded-lg hover:bg-[#6b5b4b]">Lưu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Confirmation Modal -->
+    <div id="confirm-modal" class="modal modal-inactive fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40 p-4">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm">
+            <h3 id="confirm-title" class="text-lg font-bold text-gray-900">Xác nhận</h3>
+            <p id="confirm-message" class="mt-2 text-sm text-gray-600">Bạn có chắc chắn muốn xóa mục này không?</p>
+            <div class="mt-6 flex justify-end space-x-3">
+                <button type="button" id="confirm-cancel-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300">Hủy</button>
+                <button type="button" id="confirm-ok-btn" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">Xóa</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+const tasksData = [
+    { id: 'PC01', role: 'Phụ Trách Tổng Thể', description: 'Điều phối chung, giải quyết các vấn đề phát sinh, đảm bảo chương trình diễn ra đúng kế hoạch.', status: 'Đang làm', completion: 50 },
+    { id: 'PC02', role: 'Thư Ký', description: 'Ghi chép biên bản, điểm danh, tổng hợp báo cáo và các công việc hành chính khác.', status: 'Hoàn thành', completion: 100 },
+    { id: 'PC03', role: 'Chụp Hình', description: 'Ghi lại các khoảnh khắc của sự kiện, đảm bảo chất lượng hình ảnh.', status: 'Chưa bắt đầu', completion: 0 },
+    { id: 'PC04', role: 'Hướng Dẫn & Quản Lý', description: 'Quản lý trật tự võ sinh, hướng dẫn di chuyển, hỗ trợ các hoạt động.', status: 'Đang làm', completion: 75 }
+];
+
+const AppData = {
+    students: Array.from({ length: 40 }, (_, i) => {
+        const firstNames = ['An', 'Bình', 'Cường', 'Dung', 'Giang', 'Hương', 'Khang', 'Lan', 'Minh', 'Nhi'];
+        const lastNames = ['Nguyễn', 'Trần', 'Lê', 'Phạm', 'Hoàng', 'Vũ', 'Đỗ', 'Bùi'];
+        const name = `${lastNames[i % 8]} Thị ${firstNames[i % 10]}`;
+        const year = 2005 + (i % 15);
+        const month = (i % 12) + 1;
+        const day = (i % 28) + 1;
+        const beltLevels = ['Đai Trắng', 'Đai Vàng', 'Đai Xanh', 'Đai Đỏ', 'Đai Đen'];
+        return {
+            id: `HV${101 + i}`,
+            name: name,
+            avatar: `https://placehold.co/100x100/e0d5c8/6b5b4b?text=${name.charAt(0)}`,
+            dob: `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`,
+            phone: `091${i % 10}${100 + i}${200 + i}`,
+            beltLevel: beltLevels[i % beltLevels.length],
+            className: `Lớp ${['A', 'B', 'C'][i % 3]}`,
+            height: 150 + (i % 30),
+            weight: 40 + (i % 25),
+            scheduleInfo: `T3-T5-T7`,
+            feeStatus: i % 4 === 0 ? 'Chưa đóng' : 'Đã đóng',
+            federationBelt: `Cấp ${i % 9 + 1}`,
+            feeBalance: (i % 4 === 0) ? -200000 : 0,
+        }
+    }),
+    schedule: [ { id: 'CV01', time: '06:00 - 06:15', task: 'Nhắn tin báo check', category: 'Ý thức tác phong', options: ['Tốt', 'Khá', 'Trung bình'] }, { id: 'CV02', time: '06:15 - 06:40', task: 'Điểm danh lên xe', category: 'Nề nếp chuẩn mực', options: ['Đúng giờ', 'Đến muộn', 'Vắng'] }, { id: 'CV06', time: '06:40 - 07:00', task: 'Lễ Phật', category: 'Hạnh kiểm Tu tập', options: ['Thành kính', 'Chưa trang nghiêm', 'Đùa giỡn'] }, { id: 'CV09', time: '07:00 - 07:30', task: 'Điểm tâm sáng', category: 'Nề nếp chuẩn mực', options: ['Ăn nhanh', 'Ăn chậm', 'Ăn không hết'] }, { id: 'CV16', time: '09:40 - 10:35', task: 'SINH HOẠT GIÁO LÝ', category: 'Siêng năng học tập', options: ['Rất tập trung', 'Xung phong', 'Sao nhãng', 'Đùa giỡn'] }, ],
+    assessments: { 'CV02': { 'HV103': 'Đến muộn', 'HV101': 'Đúng giờ', 'HV102': 'Đúng giờ' }, 'CV06': { 'HV105': 'Chưa trang nghiêm', 'HV106': 'Thành kính' }, 'CV09': { 'HV101': 'Ăn không hết', 'HV104': 'Ăn nhanh' }, 'CV16': { 'HV109': 'Rất tập trung', 'HV110': 'Sao nhãng' } },
+    products: [ { id: 'SP01', name: 'Sản phẩm 1 (Võ phục)', unit: 'Bộ', buyPrice: 150000, sellPrice: 200000 }, { id: 'SP02', name: 'Sản phẩm 2 (Binh khí)', unit: 'Cái', buyPrice: 250000, sellPrice: 350000 } ],
+    warehouses: [ { id: 'KHO1', name: 'Kho 1' }, { id: 'KHO2', name: 'Kho 2' } ],
+    customers: [ { id: 'KH01', name: 'Phụ huynh VS An' }, { id: 'KH02', name: 'Khách lẻ' } ],
+    inventoryTransactions: [ { id: 'ITX01', date: '2025-08-25', type: 'Nhập', itemId: 'SP01', qty: 100, from: null, to: 'KHO1', customerId: null }, { id: 'ITX02', date: '2025-08-26', type: 'Nhập', itemId: 'SP02', qty: 50, from: null, to: 'KHO1', customerId: null }, { id: 'ITX03', date: '2025-08-27', type: 'Chuyển', itemId: 'SP01', qty: 20, from: 'KHO1', to: 'KHO2', customerId: null }, { id: 'ITX04', date: '2025-08-28', type: 'Cho mượn', itemId: 'SP02', qty: 5, from: 'KHO1', to: null, customerId: 'KH02' } ],
+    accounts: [ { id: 'TM', name: 'Tiền mặt' }, { id: 'T1', name: 'Thẻ 1' }, { id: 'T2', name: 'Thẻ 2' } ],
+    finance: [ { id: 'TC01', date: '2025-08-27', type: 'Thu', amount: 5000000, accountId: 'TM', desc: 'Thu quỹ đầu tháng' }, { id: 'TC02', date: '2025-08-28', type: 'Chi', amount: 1500000, accountId: 'TM', desc: 'Chi mua đồng phục' } ],
+    sales: [ { id: 'DH001', date: '2025-08-28', customerId: 'KH01', items: [{ itemId: 'SP01', qty: 1, price: 200000 }], total: 200000, paymentAccountId: 'T1' } ],
+    tasks: tasksData,
+    personnel: Array.from({ length: 30 }, (_, i) => {
+        const firstNames = ['Anh', 'Bảo', 'Chí', 'Dũng', 'Giang', 'Hải', 'Khánh', 'Linh', 'Minh', 'Nam'];
+        const lastNames = ['Nguyễn', 'Trần', 'Lê', 'Phạm', 'Hoàng', 'Vũ', 'Đỗ', 'Bùi'];
+        const name = `${lastNames[i % 8]} Văn ${firstNames[i % 10]}`;
+        const year = 1980 + (i % 20);
+        const month = (i % 12) + 1;
+        const day = (i % 28) + 1;
+        let role = '';
+        if (i < 3) { role = 'Admin'; } 
+        else if (i < 15) { role = 'Ban Cán Sự'; } 
+        else { role = 'Thành viên'; }
+        return {
+            id: `NS${101 + i}`,
+            name: name,
+            avatar: `https://placehold.co/40x40/e0d5c8/6b5b4b?text=${name.charAt(0)}`,
+            phone: `090${i % 10}${100 + i}${200 + i}`,
+            dob: `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`,
+            address: `${i + 1} Đường ABC, Quận ${i % 5 + 1}, TP. HCM`,
+            taskId: tasksData[i % tasksData.length].id,
+            role: role
+        }
+    }),
+    examAttendances: [
+        { id: 'EA01', date: '2025-09-15', studentId: 'HV101', status: 'Đúng giờ', feeRequired: 500000, feePaid: 500000 },
+        { id: 'EA02', date: '2025-09-15', studentId: 'HV102', status: 'Đến muộn', feeRequired: 500000, feePaid: 600000 },
+        { id: 'EA03', date: '2025-09-15', studentId: 'HV103', status: 'Nghỉ phép', feeRequired: 500000, feePaid: 0 },
+    ],
+    beltExams: [
+        { id: 'BE01', date: '2025-09-15', studentId: 'HV101', result: 'Đạt', certificateLink: '#' },
+        { id: 'BE02', date: '2025-09-15', studentId: 'HV102', result: 'Không Đạt', certificateLink: '' },
+    ],
+    tournaments: [
+        { id: 'T01', date: '2025-10-20', studentId: 'HV103', content: 'Đối kháng 50kg', result: 'Huy Chương Vàng', certificateLink: '#' },
+    ],
+    demonstrations: [
+        { id: 'D01', date: '2025-11-01', studentId: 'HV104', content: 'Biểu diễn quyền', result: 'Tốt', certificateLink: '' },
+    ],
+    documents: [
+        { id: 'DOC01', content: 'Quy chế hoạt động CLB', type: 'Tài liệu chung', status: 'Hiệu lực' },
+        { id: 'DOC02', name: 'Kế hoạch tổ chức sự kiện', type: 'Tài liệu của tôi', status: 'Dự thảo' }
+    ],
+    contacts: Array.from({ length: 20 }, (_, i) => ({
+        id: `CT${101+i}`,
+        name: `Đối tác ${i+1}`,
+        info: `Thông tin liên hệ đối tác ${i+1}`,
+        status: i % 3 === 0 ? 'Không hiệu lực' : 'Hiệu lực'
+    })),
+    jobs: [
+        { id: 'JOB01', content: 'Chuẩn bị hội trường', startTime: '2025-09-01', endTime: '2025-09-02', status: 'Đã xong', personnelId: 'NS101', approverL2Id: 'NS102', approverL1Id: 'NS101' },
+        { id: 'JOB02', content: 'In ấn tài liệu', startTime: '2025-09-03', endTime: '2025-09-05', status: 'Đang làm', personnelId: 'NS115', approverL2Id: 'NS103', approverL1Id: 'NS101' }
+    ]
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    let summaryChart;
+    const modal = document.getElementById('transaction-modal');
+    const modalContent = document.getElementById('modal-content');
+    const modalTitle = document.getElementById('modal-title');
+    const form = document.getElementById('transaction-form');
+    const formFields = document.getElementById('form-fields');
+    const txIdInput = document.getElementById('tx-id');
+    const txTypeInput = document.getElementById('tx-type');
+    const confirmModal = document.getElementById('confirm-modal');
+    const confirmTitle = document.getElementById('confirm-title');
+    const confirmMessage = document.getElementById('confirm-message');
+    const confirmOkBtn = document.getElementById('confirm-ok-btn');
+    let confirmCallback = null;
+
+    const formatCurrency = (num) => new Intl.NumberFormat('vi-VN').format(num) + ' ₫';
+    const findById = (arr, id) => arr.find(item => item.id === id);
+    const calculateAge = (dob) => {
+        if (!dob) return '';
+        const birthDate = new Date(dob);
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const m = today.getMonth() - birthDate.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+        }
+        return age;
+    };
+
+    const calculateStock = (itemId) => {
+        const stock = {}; AppData.warehouses.forEach(w => stock[w.id] = 0);
+        AppData.inventoryTransactions.forEach(tx => { if (tx.itemId === itemId) { if (tx.from) stock[tx.from] -= tx.qty; if (tx.to) stock[tx.to] += tx.qty; } });
+        return stock;
+    };
+    
+    const renderAll = () => {
+        renderSummaryChart();
+        renderFinancialSummary();
+        renderInventorySummary();
+        renderClassManagement();
+        renderInventoryTable();
+        renderLoanTable();
+        renderInventoryTxTable();
+        renderFinanceTable();
+        renderSalesTable();
+        renderFinanceStats(document.getElementById('finance-stats'));
+        renderSalesStats(document.getElementById('sales-stats'));
+        renderSalesStats(document.getElementById('dashboard-sales-stats'), true);
+        renderDashboardLoanStats();
+        renderProductCatalog();
+        renderAccountCatalog();
+        renderWarehouseCatalog();
+        renderTaskDelegationTable();
+        renderPersonnelCards();
+        renderStudentCards();
+        renderTaskStats();
+        renderBeltExamTable();
+        renderTournamentTable();
+        renderDemonstrationTable();
+        renderExamAttendanceTable();
+        renderDocumentCatalog();
+        renderContactCatalog();
+        renderJobCatalog();
+    };
+
+    const renderSummaryChart = () => {
+        const goodRatings = ['Đúng giờ', 'Thành kính', 'Ăn nhanh', 'Rất tập trung', 'Xung phong', 'Tốt'];
+        let totalAssessments = 0;
+        let goodAssessments = 0;
+        Object.values(AppData.assessments).forEach(task => {
+            Object.values(task).forEach(result => {
+                totalAssessments++;
+                if (goodRatings.includes(result)) goodAssessments++;
+            });
+        });
+        const goodConductPercentage = totalAssessments > 0 ? (goodAssessments / totalAssessments) * 100 : 0;
+        const taskCompletionPercentage = AppData.tasks.length > 0 ? AppData.tasks.reduce((sum, task) => sum + task.completion, 0) / AppData.tasks.length : 0;
+        const feesPaidPercentage = AppData.students.length > 0 ? (AppData.students.filter(s => s.feeStatus === 'Đã đóng').length / AppData.students.length) * 100 : 0;
+        const personnelAssignedPercentage = AppData.personnel.length > 0 ? (AppData.personnel.filter(p => p.taskId).length / AppData.personnel.length) * 100 : 0;
+
+        const ctx = document.getElementById('summaryChart').getContext('2d');
+        if (summaryChart) summaryChart.destroy();
+        summaryChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Hạnh kiểm Tốt', 'Nhiệm vụ HT', 'Học phí Đã đóng', 'Nhân sự Đã phân công'],
+                datasets: [{
+                    data: [goodConductPercentage, taskCompletionPercentage, feesPaidPercentage, personnelAssignedPercentage],
+                    backgroundColor: ['#4ade80', '#60a5fa', '#facc15', '#a78bfa'],
+                    borderColor: '#fdfaf6',
+                    borderWidth: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed !== null) {
+                                    label += context.parsed.toFixed(1) + '%';
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                cutout: '60%'
+            }
+        });
+    };
+
+    const renderFinancialSummary = () => {
+        const container = document.getElementById('financial-summary');
+        const balances = {}; AppData.accounts.forEach(acc => balances[acc.id] = 0);
+        AppData.finance.forEach(t => { if(t.type === 'Thu') balances[t.accountId] += t.amount; else if (t.type === 'Chi') balances[t.accountId] -= t.amount; });
+        container.innerHTML = AppData.accounts.map(acc => `<div class="flex justify-between items-center text-gray-700"><span class="font-medium">${acc.name}:</span><span class="font-bold text-lg text-[#a38560]">${formatCurrency(balances[acc.id])}</span></div>`).join('');
+    };
+
+    const renderInventorySummary = () => {
+        const container = document.getElementById('inventory-summary');
+        container.innerHTML = AppData.products.map(item => {
+            const totalStock = Object.values(calculateStock(item.id)).reduce((a, b) => a + b, 0);
+            return `<div class="flex justify-between items-center text-gray-700"><span class="font-medium">${item.name}:</span><span class="font-bold text-lg text-[#a38560]">${totalStock} ${item.unit}</span></div>`;
+        }).join('');
+    };
+
+    const renderDashboardLoanStats = () => {
+        const container = document.getElementById('dashboard-loan-stats');
+        const loanedQty = AppData.inventoryTransactions.filter(tx => tx.type === 'Cho mượn').reduce((sum, tx) => sum + tx.qty, 0);
+        const returnedQty = AppData.inventoryTransactions.filter(tx => tx.type === 'Nhận lại').reduce((sum, tx) => sum + tx.qty, 0);
+        const netLoaned = loanedQty - returnedQty;
+        container.innerHTML = `<div class="flex justify-between items-center text-gray-700"><span class="font-medium">Đang cho mượn:</span><span class="font-bold text-lg text-[#a38560]">${netLoaned} SP</span></div>`;
+    };
+    
+    const renderClassManagement = () => {
+        const container = document.getElementById('class-accordion');
+        container.innerHTML = AppData.schedule.map(item => `<div class="border border-gray-200 rounded-lg bg-white"><div class="p-4 flex justify-between items-center"><div class="font-semibold text-[#6b5b4b]"><button class="accordion-btn flex items-center"><span>${item.time} - ${item.task}</span><svg class="w-5 h-5 transform transition-transform ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button></div><div class="space-x-2"><button class="text-indigo-600 hover:text-indigo-900 text-sm edit-schedule-btn" data-id="${item.id}">Sửa</button><button class="text-red-600 hover:text-red-900 text-sm delete-btn" data-type="schedule" data-id="${item.id}">Xóa</button></div></div><div class="accordion-content"><div class="p-4 border-t grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">${AppData.students.map(student => `<div class="flex items-center justify-between bg-gray-50 p-3 rounded-md"><label class="text-sm font-medium">${student.name}</label><div class="flex items-center space-x-2"><select class="p-1 border rounded-md text-sm" data-task-id="${item.id}" data-student-id="${student.id}">${item.options.map(opt => `<option value="${opt}" ${AppData.assessments[item.id]?.[student.id] === opt ? 'selected' : ''}>${opt}</option>`).join('')}</select><button class="gemini-student-summary-btn text-sm p-1 rounded bg-purple-100 text-purple-700 hover:bg-purple-200" data-student-id="${student.id}" title="Tổng kết & Gợi ý cho võ sinh">✨</button></div></div>`).join('')}</div></div></div>`).join('');
+        container.querySelectorAll('.accordion-btn').forEach(btn => { btn.addEventListener('click', (e) => { const content = e.target.closest('.border').querySelector('.accordion-content'); content.classList.toggle('open'); btn.querySelector('svg').classList.toggle('rotate-180'); }); });
+    };
+
+    const renderInventoryTable = () => {
+        const tbody = document.getElementById('inventory-table');
+        tbody.innerHTML = AppData.products.map(item => {
+            const stock = calculateStock(item.id);
+            const total = Object.values(stock).reduce((a, b) => a + b, 0);
+            return `<tr><td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${item.name}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${stock.KHO1 || 0}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${stock.KHO2 || 0}</td><td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-800">${total}</td></tr>`
+        }).join('');
+    };
+
+    const renderLoanTable = () => {
+        const tbody = document.getElementById('loan-table');
+        const loans = AppData.inventoryTransactions.filter(tx => tx.type === 'Cho mượn');
+        tbody.innerHTML = loans.map(tx => `<tr><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${tx.date}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${findById(AppData.products, tx.itemId)?.name}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${tx.qty}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${findById(AppData.customers, tx.customerId)?.name}</td></tr>`).join('');
+    };
+    
+    const renderInventoryTxTable = () => {
+        const tbody = document.getElementById('inventory-tx-table');
+        tbody.innerHTML = AppData.inventoryTransactions.map(tx => {
+            let location = '';
+            if (tx.type === 'Nhập') location = `Đến: ${findById(AppData.warehouses, tx.to)?.name}`;
+            else if (['Xuất bán', 'Cho mượn', 'Tặng'].includes(tx.type)) location = `Đến: ${findById(AppData.customers, tx.customerId)?.name}`;
+            else if (tx.type === 'Chuyển') location = `${findById(AppData.warehouses, tx.from)?.name} → ${findById(AppData.warehouses, tx.to)?.name}`;
+            return `<tr><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${tx.date}</td><td class="px-6 py-4 whitespace-nowrap text-sm font-medium">${tx.type}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${findById(AppData.products, tx.itemId)?.name}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${tx.qty}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${location}</td><td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2"><button class="text-indigo-600 hover:text-indigo-900 edit-inventory-tx-btn" data-id="${tx.id}">Sửa</button><button class="text-red-600 hover:text-red-900 delete-btn" data-type="inventoryTransaction" data-id="${tx.id}">Xóa</button></td></tr>`
+        }).join('');
+    };
+
+    const renderFinanceTable = () => {
+        const tbody = document.getElementById('finance-table');
+        tbody.innerHTML = AppData.finance.map(t => `<tr><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${t.date}</td><td class="px-6 py-4 whitespace-nowrap text-sm font-medium ${t.type === 'Thu' ? 'text-green-600' : (t.type === 'Chi' ? 'text-red-600' : 'text-blue-600')}">${t.type}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">${formatCurrency(t.amount)}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${findById(AppData.accounts, t.accountId)?.name}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${t.desc}</td><td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2"><button class="text-indigo-600 hover:text-indigo-900 edit-finance-tx-btn" data-id="${t.id}">Sửa</button><button class="text-red-600 hover:text-red-900 delete-btn" data-type="finance" data-id="${t.id}">Xóa</button></td></tr>`).join('');
+    };
+    
+    const renderSalesTable = () => {
+        const tbody = document.getElementById('sales-table');
+        tbody.innerHTML = AppData.sales.map(s => `<tr><td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${s.id}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${s.date}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${findById(AppData.customers, s.customerId)?.name}</td><td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-800">${formatCurrency(s.total)}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${s.paymentAccountId ? findById(AppData.accounts, s.paymentAccountId)?.name : 'Tặng'}</td><td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2"><button class="text-indigo-600 hover:text-indigo-900">Xem</button><button class="text-red-600 hover:text-red-900 delete-btn" data-type="sale" data-id="${s.id}">Xóa</button></td></tr>`).join('');
+    };
+
+    const renderFinanceStats = (container) => {
+        container.innerHTML = AppData.accounts.map(acc => {
+            const txs = AppData.finance.filter(t => t.accountId === acc.id);
+            const totalIn = txs.filter(t => t.type === 'Thu').reduce((sum, t) => sum + t.amount, 0);
+            const totalOut = txs.filter(t => t.type === 'Chi').reduce((sum, t) => sum + t.amount, 0);
+            const balance = totalIn - totalOut;
+            return `<div class="p-4 bg-gray-50 rounded-lg"><h4 class="font-bold text-lg text-[#6b5b4b]">${acc.name}</h4><p class="text-2xl font-bold text-[#a38560]">${formatCurrency(balance)}</p><div class="text-sm mt-2"><p class="text-green-600">Tổng thu: ${formatCurrency(totalIn)}</p><p class="text-red-600">Tổng chi: ${formatCurrency(totalOut)}</p></div><p class="text-sm text-gray-500 mt-1">Số lượng GD: ${txs.length}</p></div>`;
+        }).join('');
+    };
+
+    const renderSalesStats = (container, isDashboard = false) => {
+        const totalRevenue = AppData.sales.reduce((sum, s) => sum + s.total, 0);
+        const totalOrders = AppData.sales.length;
+        const totalQty = AppData.sales.flatMap(s => s.items).reduce((sum, item) => sum + item.qty, 0);
+        const topProduct = AppData.sales.flatMap(s => s.items).reduce((acc, item) => { acc[item.itemId] = (acc[item.itemId] || 0) + item.qty; return acc; }, {});
+        const topProductId = Object.keys(topProduct).sort((a,b) => topProduct[b] - topProduct[a])[0];
+        const topProductName = findById(AppData.products, topProductId)?.name || 'Chưa có';
+        if (isDashboard) {
+            container.innerHTML = `<div class="flex justify-between items-center text-gray-700"><span class="font-medium">Tổng Doanh Thu:</span><span class="font-bold text-lg text-[#a38560]">${formatCurrency(totalRevenue)}</span></div><div class="flex justify-between items-center text-gray-700"><span class="font-medium">Tổng Đơn Hàng:</span><span class="font-bold text-lg text-[#a38560]">${totalOrders}</span></div>`;
+        } else {
+            container.innerHTML = `<div class="p-4 bg-gray-50 rounded-lg"><h4 class="font-bold text-gray-600">Tổng Doanh Thu</h4><p class="text-2xl font-bold text-[#a38560]">${formatCurrency(totalRevenue)}</p></div><div class="p-4 bg-gray-50 rounded-lg"><h4 class="font-bold text-gray-600">Tổng Đơn Hàng</h4><p class="text-2xl font-bold text-[#a38560]">${totalOrders}</p></div><div class="p-4 bg-gray-50 rounded-lg"><h4 class="font-bold text-gray-600">Tổng SP Đã Bán</h4><p class="text-2xl font-bold text-[#a38560]">${totalQty}</p></div><div class="p-4 bg-gray-50 rounded-lg"><h4 class="font-bold text-gray-600">Sản Phẩm Bán Chạy</h4><p class="text-2xl font-bold text-[#a38560]">${topProductName}</p></div>`;
+        }
+    };
+
+    const renderTaskDelegationTable = () => {
+        const tbody = document.getElementById('task-table');
+        const statusColors = { 'Chưa bắt đầu': 'bg-gray-200 text-gray-800', 'Đang làm': 'bg-yellow-200 text-yellow-800', 'Hoàn thành': 'bg-green-200 text-green-800' };
+        tbody.innerHTML = AppData.tasks.map(task => `
+            <tr>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${task.role}</td>
+                <td class="px-6 py-4 text-sm text-gray-500">${task.description}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColors[task.status]}">${task.status}</span></td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <div class="flex items-center">
+                        <div class="w-full progress-bar h-2 mr-2"><div class="progress-bar-inner" style="width: ${task.completion}%"></div></div>
+                        <span>${task.completion}%</span>
+                    </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2"><button class="text-indigo-600 hover:text-indigo-900 edit-task-btn" data-id="${task.id}">Sửa</button><button class="text-red-600 hover:text-red-900 delete-btn" data-type="task" data-id="${task.id}">Xóa</button></td>
+            </tr>
+        `).join('');
+    };
+
+    const renderTaskStats = () => {
+        const container = document.getElementById('task-stats-container');
+        container.innerHTML = AppData.tasks.map(task => {
+            const assignedPersonnel = AppData.personnel.filter(p => p.taskId === task.id);
+            return `
+            <div class="p-4 bg-gray-50 rounded-lg">
+                <h4 class="font-bold text-lg text-[#6b5b4b]">${task.role}</h4>
+                <div class="mt-2">
+                    <div class="flex justify-between text-sm mb-1"><span>Tiến độ</span><span>${task.completion}%</span></div>
+                    <div class="w-full progress-bar h-2"><div class="progress-bar-inner" style="width: ${task.completion}%"></div></div>
+                </div>
+                <div class="mt-4">
+                    <h5 class="text-sm font-semibold">Nhân sự phụ trách:</h5>
+                    <div class="flex flex-wrap -space-x-2 mt-2">
+                        ${assignedPersonnel.map(p => `<img class="h-8 w-8 rounded-full border-2 border-white" src="${p.avatar}" title="${p.name}">`).join('')}
+                        ${assignedPersonnel.length === 0 ? '<span class="text-sm text-gray-500">Chưa có</span>' : ''}
+                    </div>
+                </div>
+            </div>
+            `;
+        }).join('');
+    };
+
+    const renderPersonnelCards = () => {
+        const container = document.getElementById('personnel-cards-container');
+        const roleColors = { 'Admin': 'bg-red-100 text-red-800', 'Ban Cán Sự': 'bg-yellow-100 text-yellow-800', 'Thành viên': 'bg-green-100 text-green-800' };
+        container.innerHTML = AppData.personnel.map(p => {
+            const task = findById(AppData.tasks, p.taskId);
+            return `
+            <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+                <div class="p-4">
+                    <div class="flex items-center space-x-4">
+                        <img class="h-20 w-20 rounded-full object-cover" src="${p.avatar}" alt="${p.name}">
+                        <div>
+                            <h4 class="text-lg font-bold text-[#6b5b4b]">${p.name}</h4>
+                            <p class="text-sm text-gray-500">${p.dob} (${calculateAge(p.dob)} tuổi)</p>
+                            <p class="text-sm text-gray-500">${p.phone}</p>
+                        </div>
+                    </div>
+                    <div class="mt-2 text-sm text-gray-600">
+                        <p><strong>Địa chỉ:</strong> ${p.address}</p>
+                        <p><strong>Nhiệm vụ:</strong> ${task ? task.role : 'Chưa phân công'}</p>
+                        <p><strong>Phân quyền:</strong> <span class="px-2 py-1 text-xs font-semibold rounded-full ${roleColors[p.role]}">${p.role}</span></p>
+                    </div>
+                </div>
+                <div class="p-2 bg-gray-50 text-right space-x-2">
+                    <button class="text-indigo-600 hover:text-indigo-900 text-sm edit-personnel-btn" data-id="${p.id}">Sửa</button>
+                    <button class="text-red-600 hover:text-red-900 text-sm delete-btn" data-type="personnel" data-id="${p.id}">Xóa</button>
+                </div>
+            </div>
+            `
+        }).join('');
+    };
+
+    const renderStudentCards = () => {
+        const container = document.getElementById('student-cards-container');
+        container.innerHTML = AppData.students.map(s => {
+            const feeColor = s.feeStatus === 'Đã đóng' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+            return `
+            <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+                <div class="p-4">
+                    <div class="flex items-center space-x-4">
+                        <img class="h-20 w-20 rounded-full object-cover" src="${s.avatar}" alt="${s.name}">
+                        <div>
+                            <h4 class="text-lg font-bold text-[#6b5b4b]">${s.name}</h4>
+                            <p class="text-sm text-gray-500">${s.dob} (${calculateAge(s.dob)} tuổi)</p>
+                            <p class="text-sm text-gray-500">SĐT: ${s.phone || 'Chưa có'}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="border-t border-gray-200 px-4 py-3 grid grid-cols-2 gap-2 text-sm">
+                    <div><strong>Lớp:</strong> ${s.className}</div>
+                    <div><strong>Cấp đai:</strong> ${s.beltLevel}</div>
+                    <div><strong>Liên đoàn:</strong> ${s.federationBelt}</div>
+                    <div><strong>Cao:</strong> ${s.height} cm</div>
+                    <div><strong>Nặng:</strong> ${s.weight} kg</div>
+                    <div class="col-span-2"><strong>Lịch tập:</strong> ${s.scheduleInfo}</div>
+                    <div class="col-span-2"><strong>Lệ phí:</strong> <span class="px-2 py-1 text-xs font-semibold rounded-full ${feeColor}">${s.feeStatus}</span></div>
+                </div>
+                <div class="p-2 bg-gray-50 text-right space-x-2">
+                    <button class="text-indigo-600 hover:text-indigo-900 text-sm edit-student-btn" data-id="${s.id}">Sửa</button>
+                    <button class="text-red-600 hover:text-red-900 text-sm delete-btn" data-type="student" data-id="${s.id}">Xóa</button>
+                </div>
+            </div>
+            `
+        }).join('');
+    };
+
+    const renderExamTable = (tbodyId, data, type) => {
+        const tbody = document.getElementById(tbodyId);
+        tbody.innerHTML = data.map((exam, index) => {
+            const student = findById(AppData.students, exam.studentId);
+            if (!student) return '';
+            const resultColor = exam.result === 'Đạt' || exam.result.includes('Vàng') ? 'text-green-600' : 'text-red-600';
+            const link = exam.certificateLink ? `<a href="${exam.certificateLink}" target="_blank" class="text-blue-500 hover:underline">Xem</a>` : 'Chưa có';
+            
+            let contentHtml = `<td>${student.beltLevel}</td>`;
+            if (type !== 'beltExam') {
+                contentHtml = `<td>${exam.content}</td>`;
+            }
+
+            return `
+            <tr class="text-sm text-gray-700">
+                <td class="p-2 text-center">${index + 1}</td>
+                <td class="p-2">${exam.date}</td>
+                <td class="p-2 font-medium">${student.name}</td>
+                <td class="p-2">${calculateAge(student.dob)}</td>
+                ${contentHtml}
+                <td class="p-2 font-semibold ${resultColor}">${exam.result}</td>
+                <td class="p-2">${link}</td>
+                <td class="p-2 text-right space-x-2"><button class="text-indigo-600 hover:text-indigo-900 text-sm edit-exam-btn" data-type="${type}" data-id="${exam.id}">Sửa</button><button class="text-red-600 hover:text-red-900 text-sm delete-btn" data-type="${type}" data-id="${exam.id}">Xóa</button></td>
+            </tr>
+            `;
+        }).join('');
+    };
+
+    const renderExamAttendanceTable = () => {
+        const tbody = document.getElementById('exam-attendance-table');
+        tbody.innerHTML = AppData.examAttendances.map((att, index) => {
+            const student = findById(AppData.students, att.studentId);
+            if (!student) return '';
+            
+            const balance = (student.feeBalance || 0) + (att.feePaid - att.feeRequired);
+            let feeStatusHtml = '';
+            if (balance === 0) {
+                feeStatusHtml = `<span class="text-green-600 font-semibold">Đã đủ</span>`;
+            } else if (balance > 0) {
+                feeStatusHtml = `<span class="text-blue-600 font-semibold">Dư ${formatCurrency(balance)}</span>`;
+            } else {
+                feeStatusHtml = `<span class="text-red-600 font-semibold">Thiếu ${formatCurrency(Math.abs(balance))}</span>`;
+            }
+
+            return `
+            <tr class="text-sm text-gray-700">
+                <td class="p-2 text-center">${index + 1}</td>
+                <td class="p-2">${att.date}</td>
+                <td class="p-2 font-medium">${student.name}</td>
+                <td class="p-2">${calculateAge(student.dob)}</td>
+                <td class="p-2">${att.status}</td>
+                <td class="p-2">${formatCurrency(att.feePaid)} / ${formatCurrency(att.feeRequired)}</td>
+                <td class="p-2">${feeStatusHtml}</td>
+                <td class="p-2 text-right space-x-2"><button class="text-indigo-600 hover:text-indigo-900 text-sm edit-exam-btn" data-type="examAttendance" data-id="${att.id}">Sửa</button><button class="text-red-600 hover:text-red-900 text-sm delete-btn" data-type="examAttendance" data-id="${att.id}">Xóa</button></td>
+            </tr>
+            `;
+        }).join('');
+    };
+
+    const renderBeltExamTable = () => renderExamTable('belt-exam-table', AppData.beltExams, 'beltExam');
+    const renderTournamentTable = () => renderExamTable('tournament-table', AppData.tournaments, 'tournament');
+    const renderDemonstrationTable = () => renderExamTable('demonstration-table', AppData.demonstrations, 'demonstration');
+    
+    const renderCatalogTable = (type, tableId, data, columns) => {
+        const tbody = document.getElementById(tableId);
+        tbody.innerHTML = data.map(item => `<tr>${columns.map(col => `<td class="px-2 py-2 text-sm">${item[col.key]}</td>`).join('')}<td class="px-2 py-2 text-right"><button class="edit-catalog-btn text-indigo-600 text-sm" data-type="${type}" data-id="${item.id}">Sửa</button><button class="delete-btn text-red-600 text-sm ml-2" data-type="${type}" data-id="${item.id}">Xóa</button></td></tr>`).join('');
+    };
+    const renderProductCatalog = () => renderCatalogTable('product', 'product-catalog-table', AppData.products, [{key: 'name'}, {key: 'sellPrice'}]);
+    const renderAccountCatalog = () => renderCatalogTable('account', 'account-catalog-table', AppData.accounts, [{key: 'name'}]);
+    const renderWarehouseCatalog = () => renderCatalogTable('warehouse', 'warehouse-catalog-table', AppData.warehouses, [{key: 'name'}]);
+    const renderDocumentCatalog = () => renderCatalogTable('document', 'document-catalog-table', AppData.documents, [{key:'content'}, {key:'type'}, {key:'status'}]);
+    const renderContactCatalog = () => renderCatalogTable('contact', 'contact-catalog-table', AppData.contacts, [{key:'name'}, {key:'info'}, {key:'status'}]);
+    const renderJobCatalog = () => {
+        const tbody = document.getElementById('job-catalog-table');
+        tbody.innerHTML = AppData.jobs.map(job => `
+            <tr>
+                <td class="p-2 text-sm">${job.content}</td>
+                <td class="p-2 text-sm">${job.status}</td>
+                <td class="p-2 text-sm">${findById(AppData.personnel, job.personnelId)?.name || ''}</td>
+                <td class="p-2 text-right"><button class="edit-catalog-btn text-indigo-600 text-sm" data-type="job" data-id="${job.id}">Sửa</button><button class="delete-btn text-red-600 text-sm ml-2" data-type="job" data-id="${job.id}">Xóa</button></td>
+            </tr>
+        `).join('');
+    };
+
+    const openModal = (type, id = null, isGift = false) => {
+        form.reset();
+        txTypeInput.value = type;
+        let data = {};
+        modalContent.className = 'bg-white rounded-lg shadow-xl p-6 w-full max-h-[90vh] overflow-y-auto';
+        if (type === 'finance') {
+            modalContent.classList.add('max-w-md');
+            modalTitle.textContent = id ? 'Sửa Giao Dịch Tài Chính' : 'Thêm Giao Dịch Tài Chính';
+            if (id) data = findById(AppData.finance, id);
+            txIdInput.value = id || '';
+            formFields.innerHTML = `<div><label class="block text-sm font-medium text-gray-700">Ngày</label><input type="date" id="f-date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" value="${data.date || new Date().toISOString().slice(0,10)}" required></div><div><label class="block text-sm font-medium text-gray-700">Loại Giao Dịch</label><select id="f-type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required><option value="Thu" ${data.type==='Thu'?'selected':''}>Thu</option><option value="Chi" ${data.type==='Chi'?'selected':''}>Chi</option><option value="Chuyển tiền" ${data.type==='Chuyển tiền'?'selected':''}>Chuyển tiền</option></select></div><div><label class="block text-sm font-medium text-gray-700">Số Tiền</label><input type="number" id="f-amount" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" value="${data.amount || ''}" required></div><div id="f-account-div"><label class="block text-sm font-medium text-gray-700">Tài Khoản</label><select id="f-account" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">${AppData.accounts.map(a=>`<option value="${a.id}" ${data.accountId===a.id?'selected':''}>${a.name}</option>`).join('')}</select></div><div id="f-from-account-div" class="hidden"><label class="block text-sm font-medium text-gray-700">Từ Tài Khoản</label><select id="f-from-account" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">${AppData.accounts.map(a=>`<option value="${a.id}">${a.name}</option>`).join('')}</select></div><div id="f-to-account-div" class="hidden"><label class="block text-sm font-medium text-gray-700">Đến Tài Khoản</label><select id="f-to-account" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">${AppData.accounts.map(a=>`<option value="${a.id}">${a.name}</option>`).join('')}</select></div><div><label class="block text-sm font-medium text-gray-700">Nội Dung</label><input type="text" id="f-desc" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" value="${data.desc || ''}" required></div>`;
+            const typeSelect = formFields.querySelector('#f-type');
+            const updateFinanceForm = (type) => { document.getElementById('f-account-div').classList.toggle('hidden', type === 'Chuyển tiền'); document.getElementById('f-from-account-div').classList.toggle('hidden', type !== 'Chuyển tiền'); document.getElementById('f-to-account-div').classList.toggle('hidden', type !== 'Chuyển tiền'); };
+            updateFinanceForm(typeSelect.value);
+            typeSelect.addEventListener('change', (e) => updateFinanceForm(e.target.value));
+        } else if (type === 'inventory') {
+            modalContent.classList.add('max-w-md');
+            modalTitle.textContent = id ? 'Sửa Giao Dịch Kho' : 'Thêm Giao Dịch Kho';
+            if (id) data = findById(AppData.inventoryTransactions, id);
+            txIdInput.value = id || '';
+            formFields.innerHTML = `<div><label>Ngày</label><input type="date" id="i-date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" value="${data.date || new Date().toISOString().slice(0,10)}" required></div><div><label>Loại Giao Dịch</label><select id="i-type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required><option value="Nhập">Nhập</option><option value="Chuyển">Chuyển</option><option value="Cho mượn">Cho mượn</option><option value="Nhận lại">Nhận lại</option></select></div><div><label>Hàng Hóa</label><select id="i-item" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>${AppData.products.map(i=>`<option value="${i.id}">${i.name}</option>`).join('')}</select></div><div><label>Số Lượng</label><input type="number" id="i-qty" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required></div><div id="i-from-div"><label>Từ Kho</label><select id="i-from" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"><option value="">---</option>${AppData.warehouses.map(w=>`<option value="${w.id}">${w.name}</option>`).join('')}</select></div><div id="i-to-div"><label>Đến Kho</label><select id="i-to" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"><option value="">---</option>${AppData.warehouses.map(w=>`<option value="${w.id}">${w.name}</option>`).join('')}</select></div><div id="i-customer-div" class="hidden"><label>Khách Hàng</label><select id="i-customer" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">${AppData.customers.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')}</select></div>`;
+        } else if (type === 'sale') {
+            modalContent.classList.add('max-w-2xl');
+            modalTitle.textContent = isGift ? 'Tạo Phiếu Tặng Hàng' : 'Tạo Đơn Hàng Mới';
+            txIdInput.value = '';
+            formFields.innerHTML = `<div><label>Ngày</label><input type="date" id="s-date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" value="${new Date().toISOString().slice(0,10)}" required></div><div><label>Khách Hàng</label><select id="s-customer" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>${AppData.customers.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')}</select></div><h4 class="font-semibold mt-4 border-b pb-2">Chi Tiết Đơn Hàng</h4><div id="s-items-container" class="space-y-2"></div><button type="button" id="add-item-btn" class="mt-2 text-sm text-indigo-600 hover:text-indigo-900">+ Thêm sản phẩm</button><div id="payment-section" class="mt-4 ${isGift ? 'hidden' : ''}"><label>Thanh toán vào tài khoản</label><select id="s-payment-account" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>${AppData.accounts.map(a=>`<option value="${a.id}">${a.name}</option>`).join('')}</select></div><div class="mt-4 text-right font-bold text-lg">Tổng cộng: <span id="s-total">${formatCurrency(0)}</span></div>`;
+            const itemsContainer = formFields.querySelector('#s-items-container');
+            const updateTotal = () => { let total = 0; itemsContainer.querySelectorAll('.item-row').forEach(row => { const qty = parseFloat(row.querySelector('.s-qty').value) || 0; const price = parseFloat(row.querySelector('.s-price').value) || 0; total += qty * price; }); document.getElementById('s-total').textContent = formatCurrency(total); };
+            const addItemRow = () => { const div = document.createElement('div'); div.className = 'item-row grid grid-cols-12 gap-2 items-center'; div.innerHTML = `<div class="col-span-6"><select class="s-item-select w-full p-2 border rounded-md">${AppData.products.map(p=>`<option value="${p.id}" data-price="${p.sellPrice}">${p.name}</option>`).join('')}</select></div><div class="col-span-2"><input type="number" class="s-qty w-full p-2 border rounded-md" value="1" min="1"></div><div class="col-span-3"><input type="number" class="s-price w-full p-2 border rounded-md bg-gray-100" ${isGift ? 'value="0" readonly' : ''}></div><div class="col-span-1"><button type="button" class="remove-item-btn text-red-500">✖</button></div>`; itemsContainer.appendChild(div); const priceInput = div.querySelector('.s-price'); const select = div.querySelector('.s-item-select'); if (!isGift) { priceInput.value = select.options[select.selectedIndex].dataset.price; } div.querySelector('.s-item-select').addEventListener('change', e => { if (!isGift) { e.target.closest('.item-row').querySelector('.s-price').value = e.target.options[e.target.selectedIndex].dataset.price; } updateTotal(); }); div.querySelector('.s-qty').addEventListener('input', updateTotal); div.querySelector('.remove-item-btn').addEventListener('click', e => { e.target.closest('.item-row').remove(); updateTotal(); }); updateTotal(); };
+            formFields.querySelector('#add-item-btn').addEventListener('click', addItemRow);
+            addItemRow();
+        } else if (type === 'task') {
+            modalContent.classList.add('max-w-md');
+            modalTitle.textContent = id ? 'Sửa Nhiệm Vụ' : 'Thêm Nhiệm Vụ';
+            if (id) data = findById(AppData.tasks, id);
+            txIdInput.value = id || '';
+            formFields.innerHTML = `<div><label>Nhiệm Vụ (Vai trò)</label><input type="text" id="t-role" class="mt-1 block w-full rounded-md" value="${data.role || ''}" required></div><div class="relative">
+                <label>Mô Tả Chi Tiết</label>
+                <textarea id="t-desc" class="mt-1 block w-full rounded-md" rows="4" required>${data.description || ''}</textarea>
+                <button type="button" id="gemini-task-desc-btn" class="gemini-btn absolute bottom-2 right-2 text-sm p-1 rounded bg-purple-100 text-purple-700 hover:bg-purple-200" title="Gợi ý mô tả bằng AI">✨ Gợi ý</button>
+            </div><div><label>Trạng Thái</label><select id="t-status" class="mt-1 block w-full rounded-md"><option value="Chưa bắt đầu" ${data.status==='Chưa bắt đầu'?'selected':''}>Chưa bắt đầu</option><option value="Đang làm" ${data.status==='Đang làm'?'selected':''}>Đang làm</option><option value="Hoàn thành" ${data.status==='Hoàn thành'?'selected':''}>Hoàn thành</option></select></div><div><label>Mức độ hoàn thành (<span id="t-completion-label">${data.completion || 0}</span>%)</label><input type="range" id="t-completion" class="mt-1 block w-full" min="0" max="100" value="${data.completion || 0}"></div>`;
+            formFields.querySelector('#t-completion').addEventListener('input', e => { document.getElementById('t-completion-label').textContent = e.target.value; });
+        } else if (type === 'schedule') {
+            modalContent.classList.add('max-w-md');
+            modalTitle.textContent = id ? 'Sửa Hoạt Động' : 'Thêm Hoạt Động';
+            if (id) data = findById(AppData.schedule, id);
+            txIdInput.value = id || '';
+            formFields.innerHTML = `<div><label>Thời gian (VD: 08:00 - 09:00)</label><input type="text" id="sc-time" class="mt-1 block w-full rounded-md" value="${data.time || ''}" required></div><div><label>Tên hoạt động</label><input type="text" id="sc-task" class="mt-1 block w-full rounded-md" value="${data.task || ''}" required></div><div><label>Hạng mục</label><input type="text" id="sc-category" class="mt-1 block w-full rounded-md" value="${data.category || ''}" required></div><div><label>Các lựa chọn đánh giá (phân cách bằng dấu phẩy)</label><input type="text" id="sc-options" class="mt-1 block w-full rounded-md" value="${data.options ? data.options.join(',') : ''}" required></div>`;
+        } else if (type === 'personnel') {
+            modalContent.classList.add('max-w-md');
+            modalTitle.textContent = id ? 'Sửa Nhân Sự' : 'Thêm Nhân Sự';
+            if (id) data = findById(AppData.personnel, id);
+            txIdInput.value = id || '';
+            const roles = ['Admin', 'Ban Cán Sự', 'Thành viên'];
+            formFields.innerHTML = `<div><label>Họ Tên</label><input type="text" id="ps-name" class="mt-1 block w-full rounded-md" value="${data.name || ''}" required></div><div><label>Ngày Sinh</label><input type="date" id="ps-dob" class="mt-1 block w-full rounded-md" value="${data.dob || ''}" required></div><div><label>Số Điện Thoại</label><input type="tel" id="ps-phone" class="mt-1 block w-full rounded-md" value="${data.phone || ''}" required></div><div><label>Địa Chỉ</label><input type="text" id="ps-address" class="mt-1 block w-full rounded-md" value="${data.address || ''}" required></div><div class="flex items-end space-x-2"><div class="flex-grow"><label>Nhiệm Vụ</label><select id="ps-task" class="mt-1 block w-full rounded-md">${AppData.tasks.map(t=>`<option value="${t.id}" ${data.taskId===t.id?'selected':''}>${t.role}</option>`).join('')}</select></div><button type="button" id="create-new-task-shortcut" class="bg-gray-200 px-3 py-2 rounded-md text-sm">Tạo Mới</button></div><div><label>Phân Quyền</label><select id="ps-role" class="mt-1 block w-full rounded-md">${roles.map(r => `<option value="${r}" ${data.role === r ? 'selected' : ''}>${r}</option>`).join('')}</select></div><div><label>Ảnh đại diện</label><input type="file" id="ps-avatar-upload" class="mt-1 block w-full text-sm"></div><img id="ps-avatar-preview" src="${data.avatar || 'https://placehold.co/100x100'}" class="mt-2 h-24 w-24 rounded-full object-cover">`;
+        } else if (type === 'student') {
+            modalContent.classList.add('max-w-md');
+            modalTitle.textContent = id ? 'Sửa Học Viên' : 'Thêm Học Viên';
+            if (id) data = findById(AppData.students, id);
+            txIdInput.value = id || '';
+            const beltLevels = ['Đai Trắng', 'Đai Vàng', 'Đai Xanh', 'Đai Đỏ', 'Đai Đen'];
+            formFields.innerHTML = `<div><label>Họ Tên</label><input type="text" id="st-name" class="mt-1 block w-full rounded-md" value="${data.name || ''}" required></div><div><label>Ngày Sinh</label><input type="date" id="st-dob" class="mt-1 block w-full rounded-md" value="${data.dob || ''}" required></div><div><label>Số Điện Thoại</label><input type="tel" id="st-phone" class="mt-1 block w-full rounded-md" value="${data.phone || ''}"></div><div class="grid grid-cols-2 gap-4"><div><label>Chiều cao (cm)</label><input type="number" id="st-height" class="mt-1 block w-full rounded-md" value="${data.height || ''}"></div><div><label>Cân nặng (kg)</label><input type="number" id="st-weight" class="mt-1 block w-full rounded-md" value="${data.weight || ''}"></div></div><div><label>Lớp</label><input type="text" id="st-class" class="mt-1 block w-full rounded-md" value="${data.className || ''}"></div><div><label>Cấp đai</label><select id="st-belt" class="mt-1 block w-full rounded-md">${beltLevels.map(b => `<option value="${b}" ${data.beltLevel===b?'selected':''}>${b}</option>`).join('')}</select></div><div><label>Cấp đai liên đoàn</label><input type="text" id="st-fed-belt" class="mt-1 block w-full rounded-md" value="${data.federationBelt || ''}"></div><div><label>Lịch tập</label><input type="text" id="st-schedule" class="mt-1 block w-full rounded-md" value="${data.scheduleInfo || ''}"></div><div><label>Lệ phí</label><select id="st-fee" class="mt-1 block w-full rounded-md"><option value="Đã đóng" ${data.feeStatus==='Đã đóng'?'selected':''}>Đã đóng</option><option value="Chưa đóng" ${data.feeStatus==='Chưa đóng'?'selected':''}>Chưa đóng</option></select></div><div><label>Ảnh đại diện</label><input type="file" id="st-avatar-upload" class="mt-1 block w-full text-sm"></div><img id="st-avatar-preview" src="${data.avatar || 'https://placehold.co/100x100'}" class="mt-2 h-24 w-24 rounded-full object-cover">`;
+        } else if (['examAttendance', 'beltExam', 'tournament', 'demonstration'].includes(type)) {
+            modalContent.classList.add('max-w-md');
+            const titles = { examAttendance: 'Điểm Danh Kỳ Thi', beltExam: 'Kỳ Thi Thăng Đai', tournament: 'Giải Đấu', demonstration: 'Buổi Biểu Diễn' };
+            modalTitle.textContent = id ? `Sửa ${titles[type]}` : `Thêm ${titles[type]}`;
+            if (id) data = findById(AppData[type+'s' || type], id);
+            txIdInput.value = id || '';
+            
+            let contentField = '';
+            if (type === 'examAttendance') {
+                const student = findById(AppData.students, data.studentId || AppData.students[0].id);
+                const feeDue = 500000 - (student.feeBalance || 0);
+                contentField = `<div><label>Trạng thái điểm danh</label><select id="ex-status" class="mt-1 block w-full rounded-md">${['Đúng giờ', 'Đến muộn', 'Nghỉ phép', 'Không phép', 'Về sớm'].map(s=>`<option value="${s}" ${data.status===s?'selected':''}>${s}</option>`).join('')}</select></div><div><label>Lệ phí cần đóng</label><input type="text" class="mt-1 block w-full rounded-md bg-gray-100" value="${formatCurrency(feeDue)}" readonly></div><div><label>Lệ phí đã đóng</label><input type="number" id="ex-fee-paid" class="mt-1 block w-full rounded-md" value="${data.feePaid || 0}" required></div>`;
+            } else if (type !== 'beltExam') {
+                contentField = `<div><label>Nội Dung</label><input type="text" id="ex-content" class="mt-1 block w-full rounded-md" value="${data.content || ''}" required></div>`;
+            }
+            formFields.innerHTML = `<div><label>Ngày</label><input type="date" id="ex-date" class="mt-1 block w-full rounded-md" value="${data.date || new Date().toISOString().slice(0,10)}" required></div><div><label>Học Viên</label><select id="ex-student" class="mt-1 block w-full rounded-md">${AppData.students.map(s=>`<option value="${s.id}" ${data.studentId===s.id?'selected':''}>${s.name}</option>`).join('')}</select></div>${contentField}<div><label>Kết Quả</label><input type="text" id="ex-result" class="mt-1 block w-full rounded-md" value="${data.result || ''}"></div><div><label>Link Văn Bằng (nếu có)</label><input type="text" id="ex-link" class="mt-1 block w-full rounded-md" value="${data.certificateLink || ''}"></div>`;
+        } else if (['product', 'account', 'warehouse'].includes(type)) {
+            modalContent.classList.add('max-w-md');
+            const titles = { product: 'Sản Phẩm', account: 'Tài Khoản', warehouse: 'Kho Hàng' };
+            modalTitle.textContent = id ? `Sửa ${titles[type]}` : `Thêm ${titles[type]}`;
+            if (id) data = findById(AppData[type+'s'], id);
+            txIdInput.value = id || '';
+            if (type === 'product') formFields.innerHTML = `<div><label>Tên Sản Phẩm</label><input type="text" id="p-name" class="mt-1 block w-full rounded-md" value="${data.name || ''}" required></div><div><label>Đơn vị</label><input type="text" id="p-unit" class="mt-1 block w-full rounded-md" value="${data.unit || ''}" required></div><div><label>Giá Mua</label><input type="number" id="p-buy" class="mt-1 block w-full rounded-md" value="${data.buyPrice || ''}" required></div><div><label>Giá Bán</label><input type="number" id="p-sell" class="mt-1 block w-full rounded-md" value="${data.sellPrice || ''}" required></div>`;
+            if (type === 'account') formFields.innerHTML = `<div><label>Tên Tài Khoản</label><input type="text" id="a-name" class="mt-1 block w-full rounded-md" value="${data.name || ''}" required></div>`;
+            if (type === 'warehouse') formFields.innerHTML = `<div><label>Tên Kho</h3label><input type="text" id="w-name" class="mt-1 block w-full rounded-md" value="${data.name || ''}" required></div>`;
+        } else if (['document', 'contact', 'job'].includes(type)) {
+            modalContent.classList.add('max-w-md');
+            const titles = { document: 'Tài Liệu', contact: 'Liên Hệ', job: 'Công Việc' };
+            modalTitle.textContent = id ? `Sửa ${titles[type]}` : `Thêm ${titles[type]}`;
+            if (id) data = findById(AppData[type+'s'], id);
+            txIdInput.value = id || '';
+            if (type === 'document') formFields.innerHTML = `<div><label>Nội dung</label><input type="text" id="doc-content" class="mt-1 block w-full rounded-md" value="${data.content || ''}" required></div><div><label>Loại</label><select id="doc-type" class="mt-1 block w-full rounded-md"><option value="Tài liệu của tôi" ${data.type==='Tài liệu của tôi'?'selected':''}>Tài liệu của tôi</option><option value="Tài liệu chung" ${data.type==='Tài liệu chung'?'selected':''}>Tài liệu chung</option></select></div><div><label>Trạng thái</label><select id="doc-status" class="mt-1 block w-full rounded-md">${['Dự thảo', 'Hiệu lực', 'Cần sửa đổi', 'Lỗi thời'].map(s=>`<option value="${s}" ${data.status===s?'selected':''}>${s}</option>`).join('')}</select></div>`;
+            if (type === 'contact') formFields.innerHTML = `<div><label>Tên</label><input type="text" id="ct-name" class="mt-1 block w-full rounded-md" value="${data.name || ''}" required></div><div><label>Thông tin chung</label><input type="text" id="ct-info" class="mt-1 block w-full rounded-md" value="${data.info || ''}" required></div><div><label>Trạng thái</label><select id="ct-status" class="mt-1 block w-full rounded-md">${['Hiệu lực', 'Không hiệu lực', 'Lỗi thời'].map(s=>`<option value="${s}" ${data.status===s?'selected':''}>${s}</option>`).join('')}</select></div>`;
+            if (type === 'job') {
+                const admins = AppData.personnel.filter(p => p.role === 'Admin');
+                const managers = AppData.personnel.filter(p => p.role === 'Ban Cán Sự');
+                formFields.innerHTML = `<div><label>Nội dung công việc</label><input type="text" id="job-content" class="mt-1 block w-full rounded-md" value="${data.content || ''}" required></div><div class="grid grid-cols-2 gap-4"><div><label>Bắt đầu</label><input type="date" id="job-start" class="mt-1 block w-full rounded-md" value="${data.startTime || ''}"></div><div><label>Kết thúc</label><input type="date" id="job-end" class="mt-1 block w-full rounded-md" value="${data.endTime || ''}"></div></div><div><label>Trạng thái</label><select id="job-status" class="mt-1 block w-full rounded-md">${['Chưa làm', 'Đang làm', 'Đã xong', 'Hủy hoãn'].map(s=>`<option value="${s}" ${data.status===s?'selected':''}>${s}</option>`).join('')}</select></div><div><label>Người phụ trách</label><select id="job-personnel" class="mt-1 block w-full rounded-md">${AppData.personnel.map(p=>`<option value="${p.id}" ${data.personnelId===p.id?'selected':''}>${p.name}</option>`).join('')}</select></div><div><label>Cấp 2 Phê duyệt (BCS)</label><select id="job-approver-l2" class="mt-1 block w-full rounded-md">${managers.map(p=>`<option value="${p.id}" ${data.approverL2Id===p.id?'selected':''}>${p.name}</option>`).join('')}</select></div><div><label>Cấp 1 Phê duyệt (Admin)</label><select id="job-approver-l1" class="mt-1 block w-full rounded-md">${admins.map(p=>`<option value="${p.id}" ${data.approverL1Id===p.id?'selected':''}>${p.name}</option>`).join('')}</select></div>`;
+            }
+        }
+        modal.classList.remove('modal-inactive');
+        modal.classList.add('modal-active');
+    };
+
+    const closeModal = () => { modal.classList.remove('modal-active'); modal.classList.add('modal-inactive'); };
+    
+    const showConfirmation = (title, message, onConfirm) => {
+        confirmTitle.textContent = title;
+        confirmMessage.textContent = message;
+        confirmOkBtn.textContent = title === 'Xác nhận Xóa' ? 'Xóa' : 'OK';
+        confirmOkBtn.className = `px-4 py-2 rounded-lg text-white ${title === 'Xác nhận Xóa' ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-500 hover:bg-blue-600'}`;
+        confirmModal.classList.remove('modal-inactive');
+        confirmModal.classList.add('modal-active');
+        confirmCallback = onConfirm;
+    };
+    const closeConfirmation = () => { confirmModal.classList.remove('modal-active'); confirmModal.classList.add('modal-inactive'); confirmCallback = null; };
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const id = txIdInput.value;
+        const type = txTypeInput.value;
+
+        if (type === 'finance') {
+            const txType = document.getElementById('f-type').value;
+            const amount = parseFloat(document.getElementById('f-amount').value);
+            const date = document.getElementById('f-date').value;
+            const desc = document.getElementById('f-desc').value;
+            if (txType === 'Chuyển tiền') {
+                const fromAccountId = document.getElementById('f-from-account').value;
+                const toAccountId = document.getElementById('f-to-account').value;
+                if (fromAccountId === toAccountId) { alert("Không thể chuyển tiền đến cùng một tài khoản."); return; }
+                const txOut = { id: `TC${Date.now()}`, date, type: 'Chi', amount, accountId: fromAccountId, desc: `Chuyển đến ${findById(AppData.accounts, toAccountId).name} - ${desc}`};
+                const txIn = { id: `TC${Date.now()+1}`, date, type: 'Thu', amount, accountId: toAccountId, desc: `Nhận từ ${findById(AppData.accounts, fromAccountId).name} - ${desc}`};
+                AppData.finance.push(txOut, txIn);
+            } else {
+                 const newTx = { id: id || `TC${Date.now()}`, date, type: txType, amount, accountId: document.getElementById('f-account').value, desc };
+                 if (id) { const index = AppData.finance.findIndex(t => t.id === id); AppData.finance[index] = newTx; } else { AppData.finance.push(newTx); }
+            }
+        } else if (type === 'inventory') {
+            const newTx = { id: id || `ITX${Date.now()}`, date: document.getElementById('i-date').value, type: document.getElementById('i-type').value, itemId: document.getElementById('i-item').value, qty: parseInt(document.getElementById('i-qty').value), from: document.getElementById('i-from').value || null, to: document.getElementById('i-to').value || null, customerId: document.getElementById('i-customer')?.value || null };
+            if (id) { const index = AppData.inventoryTransactions.findIndex(t => t.id === id); AppData.inventoryTransactions[index] = newTx; } else { AppData.inventoryTransactions.push(newTx); }
+        } else if (type === 'sale') {
+            const items = []; let total = 0;
+            const isGift = modalTitle.textContent.includes('Tặng');
+            document.querySelectorAll('.item-row').forEach(row => {
+                const itemId = row.querySelector('.s-item-select').value;
+                const qty = parseInt(row.querySelector('.s-qty').value);
+                const price = parseFloat(row.querySelector('.s-price').value);
+                items.push({ itemId, qty, price });
+                total += qty * price;
+                const saleTx = { id: `ITX${Date.now()}${itemId}`, date: document.getElementById('s-date').value, type: isGift ? 'Tặng' : 'Xuất bán', itemId, qty, from: 'KHO1', to: null, customerId: document.getElementById('s-customer').value };
+                AppData.inventoryTransactions.push(saleTx);
+            });
+            const newSale = { id: `DH${Date.now()}`, date: document.getElementById('s-date').value, customerId: document.getElementById('s-customer').value, items, total, paymentAccountId: isGift ? null : document.getElementById('s-payment-account').value };
+            AppData.sales.push(newSale);
+            if (!isGift) {
+                const financeTx = { id: `TC${Date.now()}`, date: newSale.date, type: 'Thu', amount: total, accountId: newSale.paymentAccountId, desc: `Thu từ đơn hàng ${newSale.id}` };
+                AppData.finance.push(financeTx);
+            }
+        } else if (type === 'task') {
+            const newTask = { id: id || `PC${Date.now()}`, role: document.getElementById('t-role').value, description: document.getElementById('t-desc').value, status: document.getElementById('t-status').value, completion: parseInt(document.getElementById('t-completion').value) };
+            if (id) { const index = AppData.tasks.findIndex(t => t.id === id); AppData.tasks[index] = newTask; } else { AppData.tasks.push(newTask); }
+        } else if (type === 'schedule') {
+            const newSchedule = { id: id || `CV${Date.now()}`, time: document.getElementById('sc-time').value, task: document.getElementById('sc-task').value, category: document.getElementById('sc-category').value, options: document.getElementById('sc-options').value.split(',') };
+            if (id) { const index = AppData.schedule.findIndex(s => s.id === id); AppData.schedule[index] = newSchedule; } else { AppData.schedule.push(newSchedule); }
+        } else if (type === 'personnel') {
+            const avatarFile = document.getElementById('ps-avatar-upload').files[0];
+            const currentAvatar = id ? findById(AppData.personnel, id).avatar : `https://placehold.co/40x40/e0d5c8/6b5b4b?text=${document.getElementById('ps-name').value.charAt(0)}`;
+            const newPersonnel = { id: id || `NS${Date.now()}`, name: document.getElementById('ps-name').value, dob: document.getElementById('ps-dob').value, phone: document.getElementById('ps-phone').value, address: document.getElementById('ps-address').value, taskId: document.getElementById('ps-task').value, role: document.getElementById('ps-role').value, avatar: currentAvatar };
+            if (avatarFile) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    newPersonnel.avatar = e.target.result;
+                    if (id) { const index = AppData.personnel.findIndex(p => p.id === id); AppData.personnel[index] = newPersonnel; } else { AppData.personnel.push(newPersonnel); }
+                    renderAll();
+                };
+                reader.readAsDataURL(avatarFile);
+            } else {
+                if (id) { const index = AppData.personnel.findIndex(p => p.id === id); AppData.personnel[index] = newPersonnel; } else { AppData.personnel.push(newPersonnel); }
+            }
+        } else if (type === 'student') {
+            const avatarFile = document.getElementById('st-avatar-upload').files[0];
+            const currentAvatar = id ? findById(AppData.students, id).avatar : `https://placehold.co/100x100/e0d5c8/6b5b4b?text=${document.getElementById('st-name').value.charAt(0)}`;
+            const newStudent = { id: id || `HV${Date.now()}`, name: document.getElementById('st-name').value, dob: document.getElementById('st-dob').value, phone: document.getElementById('st-phone').value, height: document.getElementById('st-height').value, weight: document.getElementById('st-weight').value, className: document.getElementById('st-class').value, beltLevel: document.getElementById('st-belt').value, federationBelt: document.getElementById('st-fed-belt').value, scheduleInfo: document.getElementById('st-schedule').value, feeStatus: document.getElementById('st-fee').value, avatar: currentAvatar };
+            if (avatarFile) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    newStudent.avatar = e.target.result;
+                    if (id) { const index = AppData.students.findIndex(s => s.id === id); AppData.students[index] = newStudent; } else { AppData.students.push(newStudent); }
+                    renderAll();
+                };
+                reader.readAsDataURL(avatarFile);
+            } else {
+                if (id) { const index = AppData.students.findIndex(s => s.id === id); AppData.students[index] = newStudent; } else { AppData.students.push(newStudent); }
+            }
+        } else if (type === 'examAttendance') {
+            const studentId = document.getElementById('ex-student').value;
+            const student = findById(AppData.students, studentId);
+            const feePaid = parseFloat(document.getElementById('ex-fee-paid').value);
+            const feeRequired = 500000; 
+            student.feeBalance = (student.feeBalance || 0) + feePaid - feeRequired;
+            const newAttendance = { id: id || `EA${Date.now()}`, date: document.getElementById('ex-date').value, studentId: studentId, status: document.getElementById('ex-status').value, feeRequired: feeRequired, feePaid: feePaid };
+            if (id) { const index = AppData.examAttendances.findIndex(ea => ea.id === id); AppData.examAttendances[index] = newAttendance; } else { AppData.examAttendances.push(newAttendance); }
+        } else if (['beltExam', 'tournament', 'demonstration'].includes(type)) {
+            const newExam = {
+                id: id || `${type.charAt(0).toUpperCase()}E${Date.now()}`,
+                date: document.getElementById('ex-date').value,
+                studentId: document.getElementById('ex-student').value,
+                content: document.getElementById('ex-content')?.value,
+                result: document.getElementById('ex-result').value,
+                certificateLink: document.getElementById('ex-link').value
+            };
+            const dataArray = AppData[type+'s' || type];
+            if (id) { const index = dataArray.findIndex(ex => ex.id === id); dataArray[index] = newExam; } else { dataArray.push(newExam); }
+        } else if (type === 'document') {
+            const newItem = { id: id || `DOC${Date.now()}`, content: document.getElementById('doc-content').value, type: document.getElementById('doc-type').value, status: document.getElementById('doc-status').value };
+            if (id) { const index = AppData.documents.findIndex(i => i.id === id); AppData.documents[index] = newItem; } else { AppData.documents.push(newItem); }
+        } else if (type === 'contact') {
+            const newItem = { id: id || `CT${Date.now()}`, name: document.getElementById('ct-name').value, info: document.getElementById('ct-info').value, status: document.getElementById('ct-status').value };
+            if (id) { const index = AppData.contacts.findIndex(i => i.id === id); AppData.contacts[index] = newItem; } else { AppData.contacts.push(newItem); }
+        } else if (type === 'job') {
+            const newItem = { id: id || `JOB${Date.now()}`, content: document.getElementById('job-content').value, startTime: document.getElementById('job-start').value, endTime: document.getElementById('job-end').value, status: document.getElementById('job-status').value, personnelId: document.getElementById('job-personnel').value, approverL2Id: document.getElementById('job-approver-l2').value, approverL1Id: document.getElementById('job-approver-l1').value };
+            if (id) { const index = AppData.jobs.findIndex(i => i.id === id); AppData.jobs[index] = newItem; } else { AppData.jobs.push(newItem); }
+        } else if (type === 'product') {
+            const newItem = { id: id || `SP${Date.now()}`, name: document.getElementById('p-name').value, unit: document.getElementById('p-unit').value, buyPrice: parseFloat(document.getElementById('p-buy').value), sellPrice: parseFloat(document.getElementById('p-sell').value) };
+            if (id) { const index = AppData.products.findIndex(i => i.id === id); AppData.products[index] = newItem; } else { AppData.products.push(newItem); }
+        } else if (type === 'account') {
+            const newItem = { id: id || `ACC${Date.now()}`, name: document.getElementById('a-name').value };
+            if (id) { const index = AppData.accounts.findIndex(i => i.id === id); AppData.accounts[index] = newItem; } else { AppData.accounts.push(newItem); }
+        } else if (type === 'warehouse') {
+            const newItem = { id: id || `WH${Date.now()}`, name: document.getElementById('w-name').value };
+            if (id) { const index = AppData.warehouses.findIndex(i => i.id === id); AppData.warehouses[index] = newItem; } else { AppData.warehouses.push(newItem); }
+        }
+        closeModal();
+        renderAll();
+    });
+
+    document.getElementById('cancel-btn').addEventListener('click', closeModal);
+    document.getElementById('confirm-cancel-btn').addEventListener('click', closeConfirmation);
+    document.getElementById('confirm-ok-btn').addEventListener('click', () => { if (confirmCallback) confirmCallback(); closeConfirmation(); });
+    
+    document.getElementById('add-finance-tx-btn').addEventListener('click', () => openModal('finance'));
+    document.getElementById('add-inventory-tx-btn').addEventListener('click', () => openModal('inventory'));
+    document.getElementById('add-sale-btn').addEventListener('click', () => openModal('sale', null, false));
+    document.getElementById('add-gift-btn').addEventListener('click', () => openModal('sale', null, true));
+    document.getElementById('add-task-btn').addEventListener('click', () => openModal('task'));
+    document.getElementById('add-schedule-btn').addEventListener('click', () => openModal('schedule'));
+    document.getElementById('add-personnel-btn').addEventListener('click', () => openModal('personnel'));
+    document.getElementById('add-student-btn').addEventListener('click', () => openModal('student'));
+    
+    document.body.addEventListener('click', (e) => {
+        if (e.target.matches('.add-catalog-btn')) openModal(e.target.dataset.type);
+        if (e.target.matches('.edit-catalog-btn')) openModal(e.target.dataset.type, e.target.dataset.id);
+        if (e.target.matches('.edit-finance-tx-btn')) openModal('finance', e.target.dataset.id);
+        if (e.target.matches('.edit-inventory-tx-btn')) openModal('inventory', e.target.dataset.id);
+        if (e.target.matches('.edit-task-btn')) openModal('task', e.target.dataset.id);
+        if (e.target.matches('.edit-schedule-btn')) openModal('schedule', e.target.dataset.id);
+        if (e.target.matches('.edit-personnel-btn')) openModal('personnel', e.target.dataset.id);
+        if (e.target.matches('.edit-student-btn')) openModal('student', e.target.dataset.id);
+        if (e.target.matches('.add-exam-btn')) openModal(e.target.dataset.type);
+        if (e.target.matches('.edit-exam-btn')) openModal(e.target.dataset.type, e.target.dataset.id);
+        if (e.target.matches('#create-new-task-shortcut')) openModal('task');
+        if (e.target.matches('.delete-btn')) {
+            const type = e.target.dataset.type;
+            const id = e.target.dataset.id;
+            showConfirmation('Xác nhận Xóa', `Bạn có chắc muốn xóa mục này không?`, () => {
+                if (type === 'finance') AppData.finance = AppData.finance.filter(t => t.id !== id);
+                if (type === 'inventoryTransaction') AppData.inventoryTransactions = AppData.inventoryTransactions.filter(t => t.id !== id);
+                if (type === 'sale') AppData.sales = AppData.sales.filter(s => s.id !== id);
+                if (type === 'product') AppData.products = AppData.products.filter(i => i.id !== id);
+                if (type === 'account') AppData.accounts = AppData.accounts.filter(i => i.id !== id);
+                if (type === 'warehouse') AppData.warehouses = AppData.warehouses.filter(i => i.id !== id);
+                if (type === 'task') AppData.tasks = AppData.tasks.filter(t => t.id !== id);
+                if (type === 'schedule') AppData.schedule = AppData.schedule.filter(s => s.id !== id);
+                if (type === 'personnel') AppData.personnel = AppData.personnel.filter(p => p.id !== id);
+                if (type === 'student') AppData.students = AppData.students.filter(s => s.id !== id);
+                if (type === 'beltExam') AppData.beltExams = AppData.beltExams.filter(e => e.id !== id);
+                if (type === 'tournament') AppData.tournaments = AppData.tournaments.filter(e => e.id !== id);
+                if (type === 'demonstration') AppData.demonstrations = AppData.demonstrations.filter(e => e.id !== id);
+                if (type === 'examAttendance') AppData.examAttendances = AppData.examAttendances.filter(e => e.id !== id);
+                if (type === 'document') AppData.documents = AppData.documents.filter(i => i.id !== id);
+                if (type === 'contact') AppData.contacts = AppData.contacts.filter(i => i.id !== id);
+                if (type === 'job') AppData.jobs = AppData.jobs.filter(i => i.id !== id);
+                renderAll();
+            });
+        }
+        if (e.target.matches('#gemini-task-desc-btn')) {
+            const roleInput = document.getElementById('t-role');
+            const descTextarea = document.getElementById('t-desc');
+            const btn = e.target;
+            if (roleInput.value.trim() === '') {
+                alert('Vui lòng nhập tên nhiệm vụ trước.');
+                return;
+            }
+            const prompt = `Bạn là một quản lý dự án chuyên nghiệp. Hãy viết một mô tả công việc chi tiết, rõ ràng và đầy đủ cho nhiệm vụ có tên: "${roleInput.value}". Mô tả cần bao gồm các trách nhiệm chính, mục tiêu cần đạt và các yêu cầu liên quan nếu có.`;
+            callGeminiAPI(prompt, btn, (text) => {
+                descTextarea.value = text;
+            });
+        }
+        if (e.target.matches('.gemini-student-summary-btn')) {
+            const studentId = e.target.dataset.studentId;
+            const student = findById(AppData.students, studentId);
+            if (!student) return;
+
+            const studentAssessments = [];
+            AppData.schedule.forEach(item => {
+                const result = AppData.assessments[item.id]?.[studentId];
+                if (result) {
+                    studentAssessments.push(`- ${item.task}: ${result}`);
+                }
+            });
+
+            if (studentAssessments.length === 0) {
+                showConfirmation('Thông báo', `Võ sinh ${student.name} chưa có đánh giá nào trong ngày.`, () => closeConfirmation());
+                return;
+            }
+
+            const prompt = `Bạn là một huynh trưởng tận tâm. Dựa trên các đánh giá sau đây của võ sinh "${student.name}":\n${studentAssessments.join('\n')}\n\nHãy viết một đoạn nhận xét ngắn gọn (khoảng 3-4 câu) mang tính xây dựng, khích lệ. Bắt đầu bằng việc ghi nhận điểm tốt, sau đó nhẹ nhàng góp ý điểm cần cải thiện và kết thúc bằng một lời động viên.`;
+            callGeminiAPI(prompt, e.target, (text) => {
+                showConfirmation(`Nhận xét cho ${student.name}`, text, () => closeConfirmation());
+            });
+        }
+    });
+    
+    modal.addEventListener('change', (e) => {
+        if (e.target.matches('#ps-avatar-upload') || e.target.matches('#st-avatar-upload')) {
+            const file = e.target.files[0];
+            if (file) {
+                const previewId = e.target.id.replace('upload', 'preview');
+                const preview = document.getElementById(previewId);
+                preview.src = URL.createObjectURL(file);
+            }
+        }
+    });
+
+    const callGeminiAPI = async (prompt, btnElement, callback) => {
+        const apiKey = ""; 
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+        
+        const originalBtnText = btnElement.innerHTML;
+        btnElement.innerHTML = '...';
+        btnElement.disabled = true;
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+            });
+            if (!response.ok) throw new Error(`API Error: ${response.status}`);
+            const result = await response.json();
+            const text = result.candidates?.[0]?.content?.parts?.[0]?.text || "Không nhận được phản hồi.";
+            callback(text.trim());
+        } catch (error) {
+            console.error("Gemini API call failed:", error);
+            alert("Đã có lỗi xảy ra khi kết nối với AI. Vui lòng thử lại.");
+        } finally {
+            btnElement.innerHTML = originalBtnText;
+            btnElement.disabled = false;
+        }
+    };
+
+    const handleNavigation = (hash) => {
+        document.querySelectorAll('.page-section').forEach(sec => sec.classList.add('hidden'));
+        document.querySelector(hash).classList.remove('hidden');
+        document.querySelectorAll('.nav-link').forEach(link => { link.classList.toggle('active', link.getAttribute('href') === hash); });
+    };
+
+    document.querySelectorAll('.nav-link').forEach(link => { link.addEventListener('click', (e) => { e.preventDefault(); window.location.hash = e.target.getAttribute('href'); }); });
+    document.getElementById('mobile-nav').addEventListener('change', (e) => { window.location.hash = e.target.value; });
+    window.addEventListener('hashchange', () => { const hash = window.location.hash || '#tongquan'; handleNavigation(hash); document.getElementById('mobile-nav').value = hash; });
+
+    const init = () => {
+        renderAll();
+        const initialHash = window.location.hash || '#tongquan';
+        handleNavigation(initialHash);
+        document.getElementById('mobile-nav').value = initialHash;
+    };
+
+    init();
+});
+</script>
+
+</body>
+</html>
