@@ -1,0 +1,2338 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <title>Quản Lý Võ Sinh Phật Quang Quyền</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+        }
+
+        .data-card {
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .data-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .filter-select {
+            @apply px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm md:text-base;
+        }
+
+        .progress-container {
+            width: 60px;
+            height: 120px;
+            background-color: #e2e8f0;
+            border: 2px solid #cbd5e1;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #3b82f6;
+            transition: height 0.5s ease-in-out;
+        }
+
+        .student-photo-container {
+            width: 64px;
+            height: 64px;
+            overflow: hidden;
+            border-radius: 9999px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            position: relative;
+            border: 2px solid #34D399;
+        }
+
+        .student-photo-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: top;
+        }
+
+        .belt-icon {
+            width: 48px;
+            height: 12px;
+            position: relative;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            border-radius: 2px;
+            box-sizing: border-box;
+        }
+
+        .belt-icon.brown {
+            background-color: #A0522D;
+        }
+
+        .belt-icon.brown-blue-border {
+            background-color: #A0522D;
+            border-color: #3b82f6;
+            border-width: 2px;
+            border-style: solid;
+        }
+
+        .belt-icon.brown-green-border {
+            background-color: #A0522D;
+            border-color: #22c55e;
+            border-width: 2px;
+            border-style: solid;
+        }
+
+        .belt-icon .stripe {
+            position: absolute;
+            width: 3px;
+            height: 100%;
+            top: 0;
+        }
+
+        .belt-icon .stripe.green {
+            background-color: #22c55e;
+        }
+
+        .belt-icon .stripe.red {
+            background-color: #ef4444;
+        }
+
+        .belt-icon .stripe.right {
+            right: 2px;
+        }
+
+        .belt-icon .stripe.right-1 {
+            right: 8px;
+        }
+
+        .belt-icon .stripe.right-2 {
+            right: 14px;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 min-h-screen flex flex-col items-center p-4">
+
+    <div id="message-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-lg shadow-xl p-6 max-w-sm w-full transform transition-transform scale-95">
+            <h3 id="modal-title" class="text-xl font-bold text-gray-900 mb-2">Thông báo</h3>
+            <p id="modal-message" class="text-gray-700 mb-4"></p>
+            <div class="flex justify-end">
+                <button id="modal-close-button"
+                    class="bg-blue-600 text-white rounded-lg px-4 py-2 font-semibold hover:bg-blue-700 transition-colors">Đóng</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="details-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center p-4 z-50">
+        <div
+            class="bg-white rounded-xl shadow-2xl p-6 md:p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto transform transition-transform scale-95">
+            <div class="flex justify-end mb-4">
+                <button id="details-close-button"
+                    class="text-gray-500 hover:text-gray-700 text-3xl font-bold">×</button>
+            </div>
+            <div id="details-content">
+            </div>
+        </div>
+    </div>
+
+    <div class="w-full max-w-5xl bg-white rounded-xl shadow-2xl p-6 md:p-10 my-8">
+        <h1 class="text-3xl md:text-4xl font-extrabold text-center text-blue-800 mb-2">
+            Quản Lý Võ Sinh
+        </h1>
+        <p class="text-center text-gray-600 mb-6">Môn phái Phật Quang Quyền</p>
+
+        <div id="user-info" class="text-sm text-center text-gray-500 mb-4">
+        </div>
+
+        <hr class="border-t-2 border-gray-200 my-6">
+
+        <div class="flex justify-center space-x-4 mb-8">
+            <button id="show-dashboard-button"
+                class="px-6 py-2 rounded-md font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-colors">
+                Xem Danh Sách
+            </button>
+            <button id="show-form-button"
+                class="px-6 py-2 rounded-md font-semibold text-gray-700 bg-gray-200 hover:bg-gray-300 transition-colors">
+                Thêm Võ Sinh
+            </button>
+            <button id="show-exercises-button"
+                class="px-6 py-2 rounded-md font-semibold text-gray-700 bg-gray-200 hover:bg-gray-300 transition-colors">
+                Quản Lý Bài Tập
+            </button>
+        </div>
+
+        <div id="dashboard-section" class="space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center md:space-x-4 space-y-4 md:space-y-0">
+                <input type="text" id="search-input" placeholder="Tìm kiếm võ sinh..."
+                    class="flex-grow w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div class="flex flex-wrap items-center justify-between mt-4 space-y-2 md:space-y-0 md:space-x-4">
+                <div class="flex-1 min-w-1/3">
+                    <label for="filter-club" class="block text-sm font-medium text-gray-700">Võ đường</label>
+                    <select id="filter-club" class="filter-select mt-1 w-full">
+                        <option value="">Tất cả</option>
+                    </select>
+                </div>
+                <div class="flex-1 min-w-1/3">
+                    <label for="filter-belt" class="block text-sm font-medium text-gray-700">Cấp đai môn phái</label>
+                    <select id="filter-belt" class="filter-select mt-1 w-full">
+                        <option value="">Tất cả</option>
+                        <option value="Nâu Đai">Nâu Đai</option>
+                        <option value="Cấp 1 - Lam Đai I">Cấp 1 - Lam Đai I</option>
+                        <option value="Cấp 2 - Lam Đai II">Cấp 2 - Lam Đai II</option>
+                        <option value="Cấp 3 - Lam Đai III">Cấp 3 - Lam Đai III</option>
+                        <option value="Cấp 4 - Lam Đai IV">Cấp 4 - Lam Đai IV</option>
+                        <option value="Cấp 5 - Lục Đai I">Cấp 5 - Lục Đai I</option>
+                        <option value="Cấp 6 - Lục Đai II">Cấp 6 - Lục Đai II</option>
+                        <option value="Cấp 7 - Lục Đai III">Cấp 7 - Lục Đai III</option>
+                        <option value="Cấp 8 - Lục Đai IV">Cấp 8 - Lục Đai IV</option>
+                        <option value="Cấp 9 - Hồng đai I">Cấp 9 - Hồng đai I</option>
+                        <option value="Cấp 9 - Hồng đai thiếu niên I">Cấp 9 - Hồng đai thiếu niên I</option>
+                        <option value="Cấp 10 - Hồng đai II">Cấp 10 - Hồng đai II</option>
+                        <option value="Cấp 10 - Hồng đai thiếu niên II">Cấp 10 - Hồng đai thiếu niên II</option>
+                        <option value="Cấp 11 - Hồng đai III">Cấp 11 - Hồng đai III</option>
+                        <option value="Cấp 11 - Hồng đai thiếu niên III">Cấp 11 - Hồng đai thiếu niên III</option>
+                        <option value="Cấp 12 - Hồng đai IV">Cấp 12 - Hồng đai IV</option>
+                        <option value="Cấp 12 - Hồng đai thiếu niên IV">Cấp 12 - Hồng đai thiếu niên IV</option>
+                        <option value="Cấp 13 - Hoàng đai I">Cấp 13 - Hoàng đai I</option>
+                        <option value="Cấp 13 - Hoàng đai thiếu niên I">Cấp 13 - Hoàng đai thiếu niên I</option>
+                        <option value="Cấp 14 - Hoàng đai II">Cấp 14 - Hoàng đai II</option>
+                        <option value="Cấp 14 - Hoàng đai thiếu niên II">Cấp 14 - Hoàng đai thiếu niên II</option>
+                        <option value="Cấp 15 - Hoàng đai III">Cấp 15 - Hoàng đai III</option>
+                        <option value="Cấp 15 - Hoàng đai thiếu niên III">Cấp 15 - Hoàng đai thiếu niên III</option>
+                        <option value="Cấp 16 - Hoàng đai IV">Cấp 16 - Hoàng đai IV</option>
+                        <option value="Cấp 16 - Hoàng đai thiếu niên IV">Cấp 16 - Hoàng đai thiếu niên IV</option>
+                        <option value="Cấp 17 - Chuẩn Võ Sư">Cấp 17 - Chuẩn Võ Sư</option>
+                    </select>
+                </div>
+                <div class="flex-1 min-w-1/3">
+                    <label for="filter-federation-belt" class="block text-sm font-medium text-gray-700">Cấp đai liên
+                        đoàn</label>
+                    <select id="filter-federation-belt" class="filter-select mt-1 w-full">
+                        <option value="">Tất cả</option>
+                    </select>
+                </div>
+                <div class="flex-1 min-w-1/3">
+                    <label for="filter-coach" class="block text-sm font-medium text-gray-700">Huấn luyện viên</label>
+                    <select id="filter-coach" class="filter-select mt-1 w-full">
+                        <option value="">Tất cả</option>
+                    </select>
+                </div>
+                <div class="flex-1 min-w-1/3">
+                    <label for="filter-status" class="block text-sm font-medium text-gray-700">Trạng thái</label>
+                    <select id="filter-status" class="filter-select mt-1 w-full">
+                        <option value="">Tất cả</option>
+                        <option value="Đã nhập môn">Đã nhập môn</option>
+                        <option value="Chưa nhập môn">Chưa nhập môn</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap items-center justify-between mt-4 space-y-2 md:space-y-0 md:space-x-4">
+                <div class="flex-1 min-w-1/3">
+                    <label for="filter-age-min" class="block text-sm font-medium text-gray-700">Tuổi tối thiểu</label>
+                    <input type="number" id="filter-age-min" placeholder="Tuổi từ" class="filter-select mt-1 w-full"
+                        min="0">
+                </div>
+                <div class="flex-1 min-w-1/3">
+                    <label for="filter-age-max" class="block text-sm font-medium text-gray-700">Tuổi tối đa</label>
+                    <input type="number" id="filter-age-max" placeholder="Tuổi đến" class="filter-select mt-1 w-full"
+                        min="0">
+                </div>
+                <div class="flex-1 min-w-1/3">
+                    <label for="filter-gender" class="block text-sm font-medium text-gray-700">Giới tính</label>
+                    <select id="filter-gender" class="filter-select mt-1 w-full">
+                        <option value="">Tất cả</option>
+                        <option value="Nam">Nam</option>
+                        <option value="Nữ">Nữ</option>
+                    </select>
+                </div>
+                <div class="flex-1 min-w-1/3">
+                    <label class="block text-sm font-medium text-gray-700">Thi thăng đai</label>
+                    <div class="flex items-center space-x-4 mt-2">
+                        <label class="inline-flex items-center">
+                            <input type="checkbox" id="filter-promotion-uniform"
+                                class="form-checkbox h-4 w-4 text-green-600">
+                            <span class="ml-2 text-gray-700 text-sm">Môn Phái</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="checkbox" id="filter-promotion-federation"
+                                class="form-checkbox h-4 w-4 text-red-600">
+                            <span class="ml-2 text-gray-700 text-sm">Liên đoàn</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div id="student-count" class="text-sm text-gray-600 mt-4 font-semibold"></div>
+            <div id="student-list" class="space-y-4">
+                <p class="text-gray-500 text-center" id="loading-message">Đang tải dữ liệu...</p>
+            </div>
+        </div>
+
+        <div id="exercises-section" class="space-y-6 hidden">
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">Danh Sách Bài Tập Môn Phái & Liên Đoàn</h2>
+            <div class="flex items-center justify-between mb-4">
+                <input type="text" id="exercise-search-input" placeholder="Tìm kiếm bài tập..."
+                    class="px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 w-1/3">
+            </div>
+            <div id="exercise-form-container" class="bg-gray-100 p-4 rounded-lg shadow-inner mb-6">
+                <h3 class="text-lg font-semibold text-gray-700 mb-2">Thêm/Sửa Bài Tập</h3>
+                <form id="exercise-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input type="hidden" id="exercise-id" name="id">
+                    <div>
+                        <label for="exercise-name" class="block text-sm font-medium text-gray-700">Tên bài tập</label>
+                        <input type="text" id="exercise-name" name="name" placeholder="Tên bài tập"
+                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm" required>
+                    </div>
+                    <div>
+                        <label for="exercise-belt" class="block text-sm font-medium text-gray-700">Cấp đai</label>
+                        <select id="exercise-belt" name="belt"
+                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm" required>
+                            <option value="">-- Chọn cấp đai --</option>
+                            <option value="Nâu Đai">Nâu Đai</option>
+                            <option value="Cấp 1 - Lam Đai I">Cấp 1 - Lam Đai I</option>
+                            <option value="Cấp 2 - Lam Đai II">Cấp 2 - Lam Đai II</option>
+                            <option value="Cấp 3 - Lam Đai III">Cấp 3 - Lam Đai III</option>
+                            <option value="Cấp 4 - Lam Đai IV">Cấp 4 - Lam Đai IV</option>
+                            <option value="Cấp 5 - Lục Đai I">Cấp 5 - Lục Đai I</option>
+                            <option value="Cấp 6 - Lục Đai II">Cấp 6 - Lục Đai II</option>
+                            <option value="Cấp 7 - Lục Đai III">Cấp 7 - Lục Đai III</option>
+                            <option value="Cấp 8 - Lục Đai IV">Cấp 8 - Lục Đai IV</option>
+                            <option value="Cấp 9 - Hồng đai I">Cấp 9 - Hồng đai I</option>
+                            <option value="Cấp 10 - Hồng đai II">Cấp 10 - Hồng đai II</option>
+                            <option value="Cấp 11 - Hồng đai III">Cấp 11 - Hồng đai III</option>
+                            <option value="Cấp 12 - Hồng đai IV">Cấp 12 - Hồng đai IV</option>
+                            <option value="Cấp 13 - Hoàng đai I">Cấp 13 - Hoàng đai I</option>
+                            <option value="Cấp 14 - Hoàng đai II">Cấp 14 - Hoàng đai II</option>
+                            <option value="Cấp 15 - Hoàng đai III">Cấp 15 - Hoàng đai III</option>
+                            <option value="Cấp 16 - Hoàng đai IV">Cấp 16 - Hoàng đai IV</option>
+                            <option value="Cấp 17 - Chuẩn Võ Sư">Cấp 17 - Chuẩn Võ Sư</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="exercise-type" class="block text-sm font-medium text-gray-700">Loại</label>
+                        <select id="exercise-type" name="type"
+                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm" required>
+                            <option value="">-- Chọn loại --</option>
+                            <option value="uniform">Môn Phái</option>
+                            <option value="federation">Liên đoàn</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="exercise-url" class="block text-sm font-medium text-gray-700">URL Hướng dẫn</label>
+                        <input type="url" id="exercise-url" name="guide_url" placeholder="https://youtube.com/..."
+                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+                    </div>
+                    <div class="col-span-1 md:col-span-2 flex items-center space-x-4">
+                        <button type="submit" id="add-exercise-button"
+                            class="flex-1 w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 transition-colors">
+                            Thêm Bài Tập
+                        </button>
+                        <button type="button" id="cancel-exercise-button"
+                            class="flex-1 w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-100 transition-colors hidden">
+                            Hủy
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div id="exercise-count" class="text-sm text-gray-600 mt-4 font-semibold"></div>
+            <div id="exercise-form-container" class="bg-gray-100 p-4 rounded-lg shadow-inner mb-6">
+            </div>
+            <div id="exercise-list-container">
+                <p class="text-gray-500 text-center">Đang tải danh sách bài tập...</p>
+            </div>
+        </div>
+
+        <div id="form-section" class="bg-gray-50 p-6 rounded-lg shadow-inner hidden">
+            <h2 id="form-title" class="text-2xl font-semibold text-gray-700 mb-4">Thêm Võ Sinh Mới</h2>
+            <form id="student-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input type="hidden" id="student-id" name="id">
+
+                <div>
+                    <label for="student-code" class="block text-sm font-medium text-gray-700">Mã Võ Sinh</label>
+                    <input type="text" id="student-code" name="studentCode" placeholder="Mã võ sinh"
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                </div>
+                <div>
+                    <label for="student-name" class="block text-sm font-medium text-gray-700">Họ và Tên</label>
+                    <input type="text" id="student-name" name="name" placeholder="Họ và tên"
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                        required>
+                </div>
+
+                <div>
+                    <label for="student-dharma" class="block text-sm font-medium text-gray-700">Pháp Danh (nếu
+                        có)</label>
+                    <input type="text" id="student-dharma" name="dharmaName" placeholder="Pháp danh"
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                </div>
+                <div>
+                    <label for="student-gender" class="block text-sm font-medium text-gray-700">Giới tính</label>
+                    <select id="student-gender" name="gender"
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        <option value="">-- Chọn --</option>
+                        <option value="Nam">Nam</option>
+                        <option value="Nữ">Nữ</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="student-dob" class="block text-sm font-medium text-gray-700">Ngày Sinh</label>
+                    <input type="date" id="student-dob" name="dob"
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                        required>
+                </div>
+                <div>
+                    <label for="student-idcard" class="block text-sm font-medium text-gray-700">Số Căn Cước Công
+                        Dân</label>
+                    <input type="text" id="student-idcard" name="idCard" placeholder="Số căn cước"
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                </div>
+
+                <div>
+                    <label for="student-pob" class="block text-sm font-medium text-gray-700">Nơi Sinh</label>
+                    <input type="text" id="student-pob" name="pob" placeholder="Nơi sinh"
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                </div>
+                <div>
+                    <label for="student-address" class="block text-sm font-medium text-gray-700">Nơi Ở Hiện Tại</label>
+                    <input type="text" id="student-address" name="address" placeholder="Nơi ở hiện tại"
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                </div>
+
+                <div>
+                    <label for="student-phone" class="block text-sm font-medium text-gray-700">Số điện thoại</label>
+                    <input type="text" id="student-phone" name="phoneNumber" placeholder="Số điện thoại"
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                </div>
+                <div>
+                    <label for="student-club" class="block text-sm font-medium text-gray-700">Võ Đường, CLB</label>
+                    <input type="text" id="student-club" name="club" placeholder="Võ đường/CLB"
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                </div>
+
+                <div>
+                    <label for="student-coach" class="block text-sm font-medium text-gray-700">Huấn luyện viên hướng
+                        dẫn</label>
+                    <input type="text" id="student-coach" name="coach" placeholder="Huấn luyện viên"
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                </div>
+                <div>
+                    <label for="student-education" class="block text-sm font-medium text-gray-700">Trình độ học
+                        vấn</label>
+                    <input type="text" id="student-education" name="educationLevel" placeholder="Trình độ học vấn"
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                </div>
+                <div class="col-span-1 flex items-center space-x-2">
+                    <input type="checkbox" id="promotion-test-uniform" name="promotionTestUniform"
+                        class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                    <label for="promotion-test-uniform" class="text-sm font-medium text-gray-700">Đăng ký thi thăng đai
+                        Môn Phái</label>
+                </div>
+                <div class="col-span-1 flex items-center space-x-2">
+                    <input type="checkbox" id="promotion-test-federation" name="promotionTestFederation"
+                        class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                    <label for="promotion-test-federation" class="text-sm font-medium text-gray-700">Đăng ký thi thăng
+                        đai Liên Đoàn</label>
+                </div>
+                <div>
+                    <label for="student-belt" class="block text-sm font-medium text-gray-700">Cấp Đai Môn Phái</label>
+                    <select id="student-belt" name="belt"
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        <option value="">-- Chọn --</option>
+                        <option value="Nâu Đai">Nâu Đai</option>
+                        <option value="Cấp 1 - Lam Đai I">Cấp 1 - Lam Đai I</option>
+                        <option value="Cấp 2 - Lam Đai II">Cấp 2 - Lam Đai II</option>
+                        <option value="Cấp 3 - Lam Đai III">Cấp 3 - Lam Đai III</option>
+                        <option value="Cấp 4 - Lam Đai IV">Cấp 4 - Lam Đai IV</option>
+                        <option value="Cấp 5 - Lục Đai I">Cấp 5 - Lục Đai I</option>
+                        <option value="Cấp 6 - Lục Đai II">Cấp 6 - Lục Đai II</option>
+                        <option value="Cấp 7 - Lục Đai III">Cấp 7 - Lục Đai III</option>
+                        <option value="Cấp 8 - Lục Đai IV">Cấp 8 - Lục Đai IV</option>
+                        <option value="Cấp 9 - Hồng đai I">Cấp 9 - Hồng đai I</option>
+                        <option value="Cấp 9 - Hồng đai thiếu niên I">Cấp 9 - Hồng đai thiếu niên I</option>
+                        <option value="Cấp 10 - Hồng đai II">Cấp 10 - Hồng đai II</option>
+                        <option value="Cấp 10 - Hồng đai thiếu niên II">Cấp 10 - Hồng đai thiếu niên II</option>
+                        <option value="Cấp 11 - Hồng đai III">Cấp 11 - Hồng đai III</option>
+                        <option value="Cấp 11 - Hồng đai thiếu niên III">Cấp 11 - Hồng đai thiếu niên III</option>
+                        <option value="Cấp 12 - Hồng đai IV">Cấp 12 - Hồng đai IV</option>
+                        <option value="Cấp 12 - Hồng đai thiếu niên IV">Cấp 12 - Hồng đai thiếu niên IV</option>
+                        <option value="Cấp 13 - Hoàng đai I">Cấp 13 - Hoàng đai I</option>
+                        <option value="Cấp 13 - Hoàng đai thiếu niên I">Cấp 13 - Hoàng đai thiếu niên I</option>
+                        <option value="Cấp 14 - Hoàng đai II">Cấp 14 - Hoàng đai II</option>
+                        <option value="Cấp 14 - Hoàng đai thiếu niên II">Cấp 14 - Hoàng đai thiếu niên II</option>
+                        <option value="Cấp 15 - Hoàng đai III">Cấp 15 - Hoàng đai III</option>
+                        <option value="Cấp 15 - Hoàng đai thiếu niên III">Cấp 15 - Hoàng đai thiếu niên III</option>
+                        <option value="Cấp 16 - Hoàng đai IV">Cấp 16 - Hoàng đai IV</option>
+                        <option value="Cấp 16 - Hoàng đai thiếu niên IV">Cấp 16 - Hoàng đai thiếu niên IV</option>
+                        <option value="Cấp 17 - Chuẩn Võ Sư">Cấp 17 - Chuẩn Võ Sư</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="student-federation-belt" class="block text-sm font-medium text-gray-700">Cấp Đai Liên
+                        Đoàn</label>
+                    <select id="student-federation-belt" name="federationBelt"
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        <option value="">-- Chọn --</option>
+                        <option value="Cấp 1">Cấp 1</option>
+                        <option value="Cấp 2">Cấp 2</option>
+                        <option value="Cấp 3">Cấp 3</option>
+                        <option value="Cấp 4">Cấp 4</option>
+                        <option value="Cấp 5">Cấp 5</option>
+                        <option value="Cấp 6">Cấp 6</option>
+                        <option value="Cấp 7">Cấp 7</option>
+                        <option value="Cấp 8">Cấp 8</option>
+                        <option value="Cấp 9">Cấp 9</option>
+                        <option value="Cấp 10">Cấp 10</option>
+                        <option value="Cấp 11">Cấp 11</option>
+                        <option value="Cấp 12">Cấp 12</option>
+                        <option value="Cấp 13">Cấp 13</option>
+                        <option value="Cấp 14">Cấp 14</option>
+                        <option value="Cấp 15">Cấp 15</option>
+                        <option value="Cấp 16">Cấp 16</option>
+                        <option value="Cấp 17">Cấp 17</option>
+                        <option value="Cấp 18">Cấp 18</option>
+                    </select>
+                </div>
+                <div class="col-span-1 md:col-span-2">
+                    <label for="student-status" class="block text-sm font-medium text-gray-700">Trạng Thái</label>
+                    <select id="student-status" name="status"
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        <option value="Chưa Nhập Môn">Chưa Nhập Môn</option>
+                        <option value="Đã Nhập Môn">Đã Nhập Môn</option>
+                    </select>
+                </div>
+
+                <div class="col-span-1 md:col-span-2">
+                    <p class="text-sm font-semibold text-gray-700 mb-2">Tải Ảnh và Văn Bằng</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="photo-uniform" class="block text-sm font-medium text-gray-700">Ảnh thẻ (Môn
+                                phái)</label>
+                            <input type="file" id="photo-uniform" name="photoUniform" accept="image/*"
+                                class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                            <img id="preview-photo-uniform"
+                                class="mt-2 w-full h-auto object-cover rounded-md shadow-sm hidden" src=""
+                                alt="Xem trước ảnh">
+                        </div>
+                        <div>
+                            <label for="photo-federation" class="block text-sm font-medium text-gray-700">Ảnh thẻ (Liên
+                                đoàn)</label>
+                            <input type="file" id="photo-federation" name="photoFederation" accept="image/*"
+                                class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                            <img id="preview-photo-federation"
+                                class="mt-2 w-full h-auto object-cover rounded-md shadow-sm hidden" src=""
+                                alt="Xem trước ảnh">
+                        </div>
+                        <div>
+                            <label for="diploma-uniform" class="block text-sm font-medium text-gray-700">Ảnh văn bằng cũ
+                                (Môn phái)</label>
+                            <input type="file" id="diploma-uniform" name="diplomaUniform" accept="image/*"
+                                class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                            <img id="preview-diploma-uniform"
+                                class="mt-2 w-full h-auto object-cover rounded-md shadow-sm hidden" src=""
+                                alt="Xem trước ảnh">
+                        </div>
+                        <div>
+                            <label for="diploma-federation" class="block text-sm font-medium text-gray-700">Ảnh văn bằng
+                                cũ (Liên đoàn)</label>
+                            <input type="file" id="diploma-federation" name="diplomaFederation" accept="image/*"
+                                class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                            <img id="preview-diploma-federation"
+                                class="mt-2 w-full h-auto object-cover rounded-md shadow-sm hidden" src=""
+                                alt="Xem trước ảnh">
+                        </div>
+                        <div>
+                            <label for="scorecard-uniform" class="block text-sm font-medium text-gray-700">Phiếu điểm
+                                (Môn phái)</label>
+                            <input type="file" id="scorecard-uniform" name="scorecardUniform" accept="image/*"
+                                class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                            <img id="preview-scorecard-uniform"
+                                class="mt-2 w-full h-auto object-cover rounded-md shadow-sm hidden" src=""
+                                alt="Xem trước ảnh">
+                        </div>
+                        <div>
+                            <label for="scorecard-federation" class="block text-sm font-medium text-gray-700">Phiếu điểm
+                                (Liên đoàn)</label>
+                            <input type="file" id="scorecard-federation" name="scorecardFederation" accept="image/*"
+                                class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                            <img id="preview-scorecard-federation"
+                                class="mt-2 w-full h-auto object-cover rounded-md shadow-sm hidden" src=""
+                                alt="Xem trước ảnh">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-span-1 md:col-span-2 flex items-center space-x-4">
+                    <button type="submit" id="submit-button"
+                        class="flex-1 w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                        Thêm Võ Sinh
+                    </button>
+                    <button type="button" id="cancel-button"
+                        class="flex-1 w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300 transition-colors hidden">
+                        Hủy
+                    </button>
+                </div>
+                <div class="col-span-1 md:col-span-2 mt-8">
+                    <div id="progress-container-placeholder">
+                        <div class="col-span-1 md:col-span-2 flex justify-end mt-4">
+                            <button type="button" id="save-progress-button"
+                                class="px-6 py-2 rounded-md font-semibold text-white bg-green-600 hover:bg-green-700 transition-colors">
+                                Lưu Tiến Độ
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'api.php';
+
+        async function editExercise(id) {
+            try {
+                const response = await fetch(`${API_URL}?_action=get_single_exercise&id=${id}`);
+                const result = await response.json();
+                if (result.success) {
+                    const exercise = result.data;
+                    document.getElementById('exercise-id').value = exercise.id;
+                    document.getElementById('exercise-name').value = exercise.name;
+                    document.getElementById('exercise-belt').value = exercise.belt;
+                    document.getElementById('exercise-type').value = exercise.type;
+                    document.getElementById('exercise-url').value = exercise.guide_url || '';
+                    document.getElementById('add-exercise-button').textContent = 'Lưu Thay Đổi';
+                    document.getElementById('cancel-exercise-button').classList.remove('hidden');
+                } else {
+                    showMessage("Lỗi", `Không tìm thấy bài tập: ${result.message}`);
+                }
+            } catch (error) {
+                showMessage("Lỗi", `Đã xảy ra lỗi khi lấy thông tin bài tập: ${error.message}`);
+            }
+        }
+
+        // async function deleteExercise(id) {
+        //     if (!confirm("Bạn có chắc chắn muốn xóa bài tập này?")) return;
+        //     try {
+        //         const data = new FormData();
+        //         data.append('_action', 'delete_exercise');
+        //         data.append('id', id);
+        //         const response = await fetch(API_URL, { method: 'POST', body: data });
+        //         const result = await response.json();
+        //         if (result.success) {
+        //             showMessage("Thành công", "Đã xóa bài tập.");
+        //             fetchExercises(); // Thêm dòng này
+        //         } else {
+        //             showMessage("Lỗi", `Lỗi khi xóa bài tập: ${result.message}`);
+        //         }
+        //     } catch (error) {
+        //         showMessage("Lỗi", `Đã xảy ra lỗi khi xóa bài tập: ${error.message}`);
+        //     }
+        // }
+        window.onload = () => {
+            // const API_URL = 'api.php';
+            const form = document.getElementById('student-form');
+            const studentList = document.getElementById('student-list');
+            const formTitle = document.getElementById('form-title');
+            const submitButton = document.getElementById('submit-button');
+            const cancelButton = document.getElementById('cancel-button');
+            const studentIdInput = document.getElementById('student-id');
+            const loadingMessage = document.getElementById('loading-message');
+            const searchInput = document.getElementById('search-input');
+
+            const dashboardSection = document.getElementById('dashboard-section');
+            const formSection = document.getElementById('form-section');
+            const exercisesSection = document.getElementById('exercises-section');
+            const showDashboardButton = document.getElementById('show-dashboard-button');
+            const showFormButton = document.getElementById('show-form-button');
+            const showExercisesButton = document.getElementById('show-exercises-button');
+
+            // Filter elements
+            const filterClub = document.getElementById('filter-club');
+            const filterBelt = document.getElementById('filter-belt');
+            const filterFederationBelt = document.getElementById('filter-federation-belt');
+            const filterCoach = document.getElementById('filter-coach');
+            const filterStatus = document.getElementById('filter-status');
+            const filterAgeMin = document.getElementById('filter-age-min');
+            const filterAgeMax = document.getElementById('filter-age-max');
+
+            // New filter elements
+            const filterGender = document.getElementById('filter-gender');
+            const filterPromotionUniform = document.getElementById('filter-promotion-uniform');
+            const filterPromotionFederation = document.getElementById('filter-promotion-federation');
+
+            // Modal elements
+            const messageModal = document.getElementById('message-modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalMessage = document.getElementById('modal-message');
+            const modalCloseButton = document.getElementById('modal-close-button');
+            const detailsModal = document.getElementById('details-modal');
+            const detailsContent = document.getElementById('details-content');
+            const detailsCloseButton = document.getElementById('details-close-button');
+            const studentCountDisplay = document.getElementById('student-count');
+            const exerciseCountDisplay = document.getElementById('exercise-count'); // Thêm dòng này
+            const exerciseListContainer = document.getElementById('exercise-list-container');
+            const exerciseForm = document.getElementById('exercise-form');
+            const exerciseIdInput = document.getElementById('exercise-id');
+            const addExerciseButton = document.getElementById('add-exercise-button');
+            const cancelExerciseButton = document.getElementById('cancel-exercise-button');
+            const exerciseSearchInput = document.getElementById('exercise-search-input');
+
+            let allStudents = [];
+            let allExercises = [];
+            document.addEventListener('click', async (e) => {
+    if (e.target && e.target.id === 'save-progress-button') {
+        const studentId = document.getElementById('student-id').value;
+        const progressCheckboxes = document.querySelectorAll('#edit-exercise-progress-list .progress-checkbox');
+        let successfulUpdates = 0;
+        const updates = [];
+
+        for (const checkbox of progressCheckboxes) {
+            const exerciseId = checkbox.dataset.exerciseId;
+            const isCompleted = checkbox.checked;
+
+            const data = new FormData();
+            data.append('_action', 'update_progress');
+            data.append('student_id', studentId);
+            data.append('exercise_id', exerciseId);
+            data.append('is_completed', isCompleted ? 1 : 0);
+            
+            updates.push(fetch(API_URL, {
+                method: 'POST',
+                body: data
+            }).then(response => response.json()));
+        }
+        
+        try {
+            const results = await Promise.all(updates);
+            let successfulUpdates = results.filter(r => r.success).length;
+            showMessage("Thành công", `Đã lưu thành công ${successfulUpdates} bài tập.`);
+        } catch (error) {
+            showMessage("Lỗi", `Đã xảy ra lỗi khi cập nhật tiến độ: ${error.message}`);
+        } finally {
+            // Tải lại tiến độ sau khi tất cả các yêu cầu đã hoàn tất
+            fetchStudentProgressForEdit(studentId, document.getElementById('student-belt').value);
+        }
+    }
+});
+            ///
+            document.addEventListener('click', async (e) => {
+    if (e.target && e.target.id === 'save-progress-button') {
+        const studentId = document.getElementById('student-id').value;
+        const progressCheckboxes = document.querySelectorAll('#edit-exercise-progress-list .progress-checkbox');
+        const completedExercises = [];
+
+        for (const checkbox of progressCheckboxes) {
+            if (checkbox.checked) {
+                completedExercises.push(checkbox.dataset.exerciseId);
+            }
+        }
+        
+        const data = new FormData();
+        data.append('_action', 'update_all_progress');
+        data.append('student_id', studentId);
+        data.append('completed_exercises', JSON.stringify(completedExercises));
+
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                body: data
+            });
+            const result = await response.json();
+            
+            if (result.success) {
+                showMessage("Thành công", `Đã lưu thành công tiến độ của võ sinh.`);
+            } else {
+                showMessage("Lỗi", `Cập nhật tiến độ bài tập thất bại: ${result.message}`);
+            }
+        } catch (error) {
+            showMessage("Lỗi", `Đã xảy ra lỗi khi cập nhật tiến độ: ${error}`);
+        } finally {
+            // Tải lại tiến độ để cập nhật "lọ nước"
+            fetchStudentProgressForEdit(studentId, document.getElementById('student-belt').value);
+        }
+    }
+});
+            // Thêm đoạn code này vào cuối phần khai báo biến trong window.onload
+            exerciseSearchInput.addEventListener('input', () => {
+                const searchTerm = exerciseSearchInput.value.toLowerCase();
+                const filteredExercises = allExercises.filter(exercise => {
+                    const name = (exercise.name || '').toLowerCase();
+                    const belt = (exercise.belt || '').toLowerCase();
+                    const type = (exercise.type || '').toLowerCase();
+
+                    return name.includes(searchTerm) ||
+                        belt.includes(searchTerm) ||
+                        type.includes(searchTerm);
+                });
+                displayExercises(filteredExercises);
+            });
+            // exerciseListContainer.addEventListener('click', (e) => {
+            //     const target = e.target;
+            //     if (target.classList.contains('edit-exercise-btn')) {
+            //         const exerciseId = target.getAttribute('data-id');
+            //         editExercise(exerciseId);
+            //     } else if (target.classList.contains('delete-exercise-btn')) {
+            //         const exerciseId = target.getAttribute('data-id');
+            //         deleteExercise(exerciseId);
+            //     }
+            // });
+            
+            // Function to show custom modal message
+            function showMessage(title, message) {
+                modalTitle.textContent = title;
+                modalMessage.textContent = message;
+                messageModal.classList.remove('hidden');
+                messageModal.classList.add('flex');
+            }
+
+            modalCloseButton.onclick = () => {
+                messageModal.classList.add('hidden');
+                messageModal.classList.remove('flex');
+            };
+
+            detailsCloseButton.onclick = () => {
+                detailsModal.classList.add('hidden');
+                detailsModal.classList.remove('flex');
+            };
+            exerciseListContainer.addEventListener('click', (e) => {
+                const target = e.target;
+                if (target.classList.contains('edit-exercise-btn')) {
+                    const exerciseId = target.getAttribute('data-id');
+                    editExercise(exerciseId);
+                } else if (target.classList.contains('delete-exercise-btn')) {
+                    const exerciseId = target.getAttribute('data-id');
+                    deleteExercise(exerciseId);
+                }
+            });
+            // --- Image Download Function ---
+            function downloadImage(url, filename) {
+                if (!url) {
+                    showMessage("Lỗi", "Không có ảnh để tải về.");
+                    return;
+                }
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+
+            // --- Fetch and Populate Filters ---
+            async function fetchFilterOptions() {
+                try {
+                    const response = await fetch(`${API_URL}?_action=get_filters`);
+                    const result = await response.json();
+                    if (result.success) {
+                        populateFilterDropdown(filterClub, result.data.club);
+                        populateFilterDropdown(filterBelt, result.data.belt);
+                        populateFilterDropdown(filterFederationBelt, result.data.federationBelt);
+                        populateFilterDropdown(filterCoach, result.data.coach);
+                    }
+                } catch (error) {
+                    console.error("Error fetching filter options:", error);
+                }
+            }
+            function populateFilterDropdown(selectElement, options) {
+                selectElement.innerHTML = '<option value="">Tất cả</option>';
+                options.forEach(optionValue => {
+                    const option = document.createElement('option');
+                    option.value = optionValue;
+                    option.textContent = optionValue;
+                    selectElement.appendChild(option);
+                });
+            }
+            filterClub.addEventListener('change', fetchStudents);
+            filterBelt.addEventListener('change', fetchStudents);
+            filterFederationBelt.addEventListener('change', fetchStudents);
+            filterCoach.addEventListener('change', fetchStudents);
+            filterStatus.addEventListener('change', fetchStudents);
+            filterAgeMin.addEventListener('input', fetchStudents);
+            filterAgeMax.addEventListener('input', fetchStudents);
+            filterGender.addEventListener('change', fetchStudents);
+            filterPromotionUniform.addEventListener('change', fetchStudents);
+            filterPromotionFederation.addEventListener('change', fetchStudents);
+
+            // Function to calculate age from DOB
+            function calculateAge(dob) {
+                if (!dob) return null;
+                const birthDate = new Date(dob);
+                const today = new Date();
+                let age = today.getFullYear() - birthDate.getFullYear();
+                const monthDiff = today.getMonth() - birthDate.getMonth();
+                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                    age--;
+                }
+                return age;
+            }
+            // - Xu ly tien do
+            async function fetchStudentProgressForEdit(studentId, belt) {
+                const progressList = document.getElementById('edit-exercise-progress-list');
+                const progressText = document.getElementById('edit-progress-text');
+                const progressFill = document.getElementById('edit-progress-fill');
+                const progressInfo = document.getElementById('edit-progress-info');
+
+                progressList.innerHTML = '';
+                progressText.textContent = '0%';
+                progressFill.style.height = '0%';
+                progressInfo.textContent = 'Đang tải tiến độ...';
+
+                try {
+                    const response = await fetch(`${API_URL}?_action=get_student_progress&student_id=${studentId}&belt=${encodeURIComponent(belt)}`);
+                    const result = await response.json();
+
+                    if (result.success) {
+                        const exercises = result.data;
+                        if (exercises.length === 0) {
+                            progressInfo.textContent = 'Không có bài tập nào cho cấp đai này.';
+                            return;
+                        }
+
+                        let completedCount = 0;
+                        const tableHtml = `
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-2 py-2 text-left text-sm font-medium text-gray-500">STT</th>
+                                <th class="px-2 py-2 text-left text-sm font-medium text-gray-500">Tên bài tập</th>
+                                <th class="px-2 py-2 text-center text-sm font-medium text-gray-500">Hoàn thành</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            ${exercises.map((ex, index) => {
+                            const isChecked = ex.is_completed == 1;
+                            if (isChecked) completedCount++;
+                            return `
+                                    <tr>
+                                        <td class="px-2 py-2 whitespace-nowrap text-sm text-gray-500">${index + 1}</td>
+                                        <td class="px-2 py-2 whitespace-nowrap text-sm font-medium text-gray-900">${ex.name}</td>
+                                        <td class="px-2 py-2 whitespace-nowrap text-center text-sm text-gray-500">
+                                            <input type="checkbox" class="progress-checkbox h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" data-student-id="${studentId}" data-exercise-id="${ex.id}" ${isChecked ? 'checked' : ''}>
+                                        </td>
+                                    </tr>
+                                `;
+                        }).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+                        progressList.innerHTML = tableHtml;
+
+                        const percentage = Math.round((completedCount / exercises.length) * 100).toFixed(2);
+                        progressText.textContent = `${percentage}%`;
+                        progressFill.style.height = `${percentage}%`;
+                        progressInfo.textContent = `Đã hoàn thành ${completedCount} trên tổng số ${exercises.length} bài tập.`;
+
+                        document.querySelectorAll('#edit-exercise-progress-list .progress-checkbox').forEach(checkbox => {
+                            checkbox.addEventListener('change', updateProgress);
+                        });
+                    } else {
+                        progressInfo.textContent = `Lỗi: ${result.message}`;
+                    }
+                } catch (error) {
+                    progressInfo.textContent = `Đã xảy ra lỗi khi tải tiến độ.`;
+                    console.error("Error fetching progress:", error);
+                }
+            }
+            // --- CRUD Operations ---
+            async function fetchStudents() {
+                loadingMessage.style.display = 'block';
+                studentList.innerHTML = '';
+                const club = filterClub.value;
+                const belt = filterBelt.value;
+                const federationBelt = filterFederationBelt.value;
+                const coach = filterCoach.value;
+                const status = filterStatus.value;
+                const ageMin = filterAgeMin.value ? parseInt(filterAgeMin.value) : null;
+                const ageMax = filterAgeMax.value ? parseInt(filterAgeMax.value) : null;
+                const gender = filterGender.value;
+                const promotionUniform = filterPromotionUniform.checked;
+                const promotionFederation = filterPromotionFederation.checked;
+
+                let url = `${API_URL}?_action=read`;
+                if (club) url += `&club=${encodeURIComponent(club)}`;
+                if (belt) url += `&belt=${encodeURIComponent(belt)}`;
+                if (federationBelt) url += `&federationBelt=${encodeURIComponent(federationBelt)}`;
+                if (coach) url += `&coach=${encodeURIComponent(coach)}`;
+                if (status) url += `&status=${encodeURIComponent(status)}`;
+                if (gender) url += `&gender=${encodeURIComponent(gender)}`;
+                if (promotionUniform) url += `&promotionUniform=1`;
+                if (promotionFederation) url += `&promotionFederation=1`;
+
+                try {
+                    const response = await fetch(url);
+                    const result = await response.json();
+                    if (result.success) {
+                        let students = result.data.students;
+
+                        // Apply age filtering on the client side
+                        if (ageMin !== null || ageMax !== null) {
+                            students = students.filter(student => {
+                                const age = calculateAge(student.dob);
+                                const minCheck = ageMin === null || (age !== null && age >= ageMin);
+                                const maxCheck = ageMax === null || (age !== null && age <= ageMax);
+                                return minCheck && maxCheck;
+                            });
+                        }
+
+                        allStudents = students.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+                        displayStudents(allStudents);
+                        studentCountDisplay.textContent = `Tổng số võ sinh: ${allStudents.length}`;
+                    } else {
+                        showMessage("Lỗi", `Không thể tải dữ liệu võ sinh: ${result.message}`);
+                        loadingMessage.textContent = "Không thể tải dữ liệu.";
+                    }
+                } catch (error) {
+                    showMessage("Lỗi", `Đã xảy ra lỗi khi tải dữ liệu: ${error.message}`);
+                    console.error("Error fetching students:", error);
+                    loadingMessage.textContent = "Không thể tải dữ liệu.";
+                } finally {
+                    loadingMessage.style.display = 'none';
+                }
+            }
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const studentId = studentIdInput.value;
+                let action = studentId ? 'update' : 'create';
+                let data = new FormData(form);
+                data.append('_action', action);
+                if (studentId) {
+                    data.append('id', studentId);
+                }
+
+                try {
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        body: data
+                    });
+                    const result = await response.json();
+
+                    if (result.success) {
+                        showMessage("Thành công", `Đã ${studentId ? 'cập nhật' : 'thêm'} võ sinh thành công.`);
+                        form.reset();
+                        studentIdInput.value = '';
+                        formTitle.textContent = 'Thêm Võ Sinh Mới';
+                        submitButton.textContent = 'Thêm Võ Sinh';
+                        cancelButton.classList.add('hidden');
+                        fetchStudents(); // Refresh data
+                        fetchFilterOptions(); // Refresh filter options
+                        document.querySelectorAll('img[id^="preview-"]').forEach(img => img.classList.add('hidden'));
+                    } else {
+                        showMessage("Lỗi", `Đã xảy ra lỗi: ${result.message}`);
+                    }
+                } catch (error) {
+                    showMessage("Lỗi", `Đã xảy ra lỗi khi lưu võ sinh: ${error.message}`);
+                    console.error("Error saving student:", error);
+                }
+            });
+
+            async function deleteStudent(id) {
+                try {
+                    const data = new FormData();
+                    data.append('_action', 'delete');
+                    data.append('id', id);
+
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        body: data
+                    });
+                    const result = await response.json();
+
+                    if (result.success) {
+                        showMessage("Thành công", "Đã xóa võ sinh.");
+                        fetchStudents(); // Refresh data
+                        fetchFilterOptions(); // Refresh filter options
+                    } else {
+                        showMessage("Lỗi", `Đã xảy ra lỗi: ${result.message}`);
+                    }
+                } catch (error) {
+                    showMessage("Lỗi", `Đã xảy ra lỗi khi xóa võ sinh: ${error.message}`);
+                    console.error("Error deleting student:", error);
+                }
+            }
+
+            // Function to set up the form for editing
+            // Function to set up the form for editing
+            // Function to set up the form for editing
+            function editStudent(student) {
+                // Reset the placeholder content first to avoid duplication
+                document.getElementById('progress-container-placeholder').innerHTML = '';
+
+                document.getElementById('student-code').value = student.student_code || '';
+                document.getElementById('student-code').readOnly = true;
+                document.getElementById('student-name').value = student.name;
+                document.getElementById('student-dharma').value = student.dharma_name || '';
+                document.getElementById('student-gender').value = student.gender || '';
+                document.getElementById('student-dob').value = student.dob;
+                document.getElementById('student-idcard').value = student.id_card || '';
+                document.getElementById('student-pob').value = student.pob || '';
+                document.getElementById('student-address').value = student.address || '';
+                document.getElementById('student-phone').value = student.phone_number || '';
+                document.getElementById('student-club').value = student.club || '';
+                document.getElementById('student-coach').value = student.coach || '';
+                document.getElementById('student-education').value = student.education_level || '';
+
+                // Cập nhật trạng thái checkbox từ dữ liệu DB
+                document.getElementById('promotion-test-uniform').checked = student.promotion_test_uniform == 1;
+                document.getElementById('promotion-test-federation').checked = student.promotion_test_federation == 1;
+
+                document.getElementById('student-belt').value = student.belt || '';
+                document.getElementById('student-federation-belt').value = student.federation_belt || '';
+                document.getElementById('student-status').value = student.status || 'Đã Nhập Môn';
+                studentIdInput.value = student.id;
+
+                // Show preview images if URLs exist
+                document.getElementById('preview-photo-uniform').src = student.photo_uniform;
+                document.getElementById('preview-photo-uniform').classList.toggle('hidden', !student.photo_uniform);
+                document.getElementById('preview-photo-federation').src = student.photo_federation;
+                document.getElementById('preview-photo-federation').classList.toggle('hidden', !student.photo_federation);
+                document.getElementById('preview-diploma-uniform').src = student.diploma_uniform;
+                document.getElementById('preview-diploma-uniform').classList.toggle('hidden', !student.diploma_uniform);
+                document.getElementById('preview-diploma-federation').src = student.diploma_federation;
+                document.getElementById('preview-diploma-federation').classList.toggle('hidden', !student.diploma_federation);
+                document.getElementById('preview-scorecard-uniform').src = student.scorecard_uniform;
+                document.getElementById('preview-scorecard-uniform').classList.toggle('hidden', !student.scorecard_uniform);
+                document.getElementById('preview-scorecard-federation').src = student.scorecard_federation;
+                document.getElementById('preview-scorecard-federation').classList.toggle('hidden', !student.scorecard_federation);
+
+                formTitle.textContent = 'Sửa Thông Tin Võ Sinh';
+                submitButton.textContent = 'Lưu Thay Đổi';
+                cancelButton.classList.remove('hidden');
+
+                const progressPlaceholder = document.getElementById('progress-container-placeholder');
+                progressPlaceholder.innerHTML = `
+        <h4 class="text-xl font-bold text-gray-900 mb-4">Tiến Độ Thi Thăng Đai (${student.belt || 'N/A'})</h4>
+        <div class="flex items-center space-x-6">
+            <div class="flex flex-col items-center">
+                <div class="progress-container">
+                    <div id="edit-progress-fill" class="progress-fill"></div>
+                </div>
+                <span id="edit-progress-text" class="mt-2 text-lg font-bold text-gray-700">0%</span>
+            </div>
+            <div class="flex-grow">
+                <p class="text-sm text-gray-500 mb-2" id="edit-progress-info">Đang tải tiến độ...</p>
+                <div id="edit-exercise-progress-list" class="space-y-2">
+                </div>
+            </div>
+        </div>
+        <div class="col-span-1 md:col-span-2 flex justify-end mt-4">
+            <button type="button" id="save-progress-button" class="px-6 py-2 rounded-md font-semibold text-white bg-green-600 hover:bg-green-700 transition-colors">
+                Lưu Tiến Độ
+            </button>
+        </div>
+    `;
+
+                showSection('form');
+
+                // Tải tiến độ sau khi form đã được hiển thị
+                if (student.belt) {
+                    fetchStudentProgressForEdit(student.id, student.belt);
+                }
+                document.getElementById('save-progress-button').classList.remove('hidden');
+            }
+
+            // Handle cancel button
+            cancelButton.addEventListener('click', () => {
+                form.reset();
+                studentIdInput.value = '';
+                formTitle.textContent = 'Thêm Võ Sinh Mới';
+                submitButton.textContent = 'Thêm Võ Sinh';
+                cancelButton.classList.add('hidden');
+                document.querySelectorAll('img[id^="preview-"]').forEach(img => img.classList.add('hidden'));
+                showSection('dashboard');
+            });
+
+            // Show student details in modal
+            function showStudentDetails(student) {
+                detailsContent.innerHTML = `
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">${student.name}</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-4 gap-x-8 text-gray-700">
+                        <div><span class="font-semibold">Mã Võ Sinh:</span> ${student.student_code || 'N/A'}</div>
+                        <div><span class="font-semibold">Pháp Danh:</span> ${student.dharma_name || 'N/A'}</div>
+                        <div><span class="font-semibold">Giới tính:</span> ${student.gender || 'N/A'}</div>
+                        <div><span class="font-semibold">Ngày Sinh:</span> ${student.dob ? new Date(student.dob).toLocaleDateString('vi-VN') : 'N/A'}</div>
+                        <div><span class="font-semibold">CCCD:</span> ${student.id_card || 'N/A'}</div>
+                        <div><span class="font-semibold">Nơi Sinh:</span> ${student.pob || 'N/A'}</div>
+                        <div><span class="font-semibold">Nơi Ở:</span> ${student.address || 'N/A'}</div>
+                        <div><span class="font-semibold">Số điện thoại:</span> ${student.phone_number || 'N/A'}</div>
+                        <div><span class="font-semibold">Võ đường:</span> ${student.club || 'N/A'}</div>
+                        <div><span class="font-semibold">Huấn luyện viên:</span> ${student.coach || 'N/A'}</div>
+                        <div><span class="font-semibold">Trình độ học vấn:</span> ${student.education_level || 'N/A'}</div>
+                        <div><span class="font-semibold">Cấp Đai Môn Phái:</span> ${student.belt || 'N/A'}</div>
+                        <div><span class="font-semibold">Cấp Đai Liên Đoàn:</span> ${student.federation_belt || 'N/A'}</div>
+                        <div><span class="font-semibold">Trạng Thái:</span> ${student.status || 'N/A'}</div>
+                        <div><span class="font-semibold">Đăng ký thi Môn phái:</span> ${student.promotion_test_uniform == 1 ? 'Đã đăng ký' : 'Chưa đăng ký'}</div>
+                        <div><span class="font-semibold">Đăng ký thi Liên đoàn:</span> ${student.promotion_test_federation == 1 ? 'Đã đăng ký' : 'Chưa đăng ký'}</div>
+                    </div>
+                    <div class="mt-8">
+                        <h4 class="text-xl font-bold text-gray-900 mb-4">Tiến Độ Thi Thăng Đai (${student.belt || 'N/A'})</h4>
+                        <div class="flex items-center space-x-6">
+                            <div class="flex flex-col items-center">
+                                <div class="progress-container">
+                                    <div id="progress-fill" class="progress-fill"></div>
+                                </div>
+                                <span id="progress-text" class="mt-2 text-lg font-bold text-gray-700">0%</span>
+                            </div>
+                            <div class="flex-grow">
+                                <p class="text-sm text-gray-500 mb-2" id="progress-info">Đang tải tiến độ...</p>
+                                <div id="exercise-progress-list" class="space-y-2">
+                                    </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 mt-6 text-center">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500 mb-2">Ảnh Thẻ Môn Phái</p>
+                            <img src="${student.photo_uniform || 'https://placehold.co/150x200/e5e7eb/4b5563?text=N/A'}" alt="Ảnh thẻ môn phái" class="w-full h-auto object-cover rounded-md shadow-sm" onerror="this.onerror=null;this.src='https://placehold.co/150x200/e5e7eb/4b5563?text=N/A'">
+                            <button onclick="downloadImage('${student.photo_uniform}', '${student.student_code || 'N/A'}_anh_the_mon_phai.png')" class="mt-2 px-4 py-2 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 transition-colors">Tải ảnh về</button>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-500 mb-2">Ảnh Thẻ Liên Đoàn</p>
+                            <img src="${student.photo_federation || 'https://placehold.co/150x200/e5e7eb/4b5563?text=N/A'}" alt="Ảnh thẻ liên đoàn" class="w-full h-auto object-cover rounded-md shadow-sm" onerror="this.onerror=null;this.src='https://placehold.co/150x200/e5e7eb/4b5563?text=N/A'">
+                            <button onclick="downloadImage('${student.photo_federation}', '${student.student_code || 'N/A'}_anh_the_lien_doan.png')" class="mt-2 px-4 py-2 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 transition-colors">Tải ảnh về</button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 mt-4 text-center">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500 mb-2">Văn Bằng Cũ Môn Phái</p>
+                            <img src="${student.diploma_uniform || 'https://placehold.co/200x150/e5e7eb/4b5563?text=N/A'}" alt="Văn bằng môn phái" class="w-full h-auto object-cover rounded-md shadow-sm" onerror="this.onerror=null;this.src='https://placehold.co/200x150/e5e7eb/4b5563?text=N/A'">
+                            <button onclick="downloadImage('${student.diploma_uniform}', '${student.student_code || 'N/A'}_van_bang_mon_phai.png')" class="mt-2 px-4 py-2 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 transition-colors">Tải ảnh về</button>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-500 mb-2">Văn Bằng Cũ Liên Đoàn</p>
+                            <img src="${student.diploma_federation || 'https://placehold.co/200x150/e5e7eb/4b5563?text=N/A'}" alt="Văn bằng liên đoàn" class="w-full h-auto object-cover rounded-md shadow-sm" onerror="this.onerror=null;this.src='https://placehold.co/200x150/e5e7eb/4b5563?text=N/A'">
+                            <button onclick="downloadImage('${student.diploma_federation}', '${student.student_code || 'N/A'}_van_bang_lien_doan.png')" class="mt-2 px-4 py-2 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 transition-colors">Tải ảnh về</button>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-500 mb-2">Phiếu điểm Môn Phái</p>
+                            <img src="${student.scorecard_uniform || 'https://placehold.co/200x150/e5e7eb/4b5563?text=N/A'}" alt="Phiếu điểm môn phái" class="w-full h-auto object-cover rounded-md shadow-sm" onerror="this.onerror=null;this.src='https://placehold.co/200x150/e5e7eb/4b5563?text=N/A'">
+                            <button onclick="downloadImage('${student.scorecard_uniform}', '${student.student_code || 'N/A'}_phieu_diem_mon_phai.png')" class="mt-2 px-4 py-2 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 transition-colors">Tải ảnh về</button>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-500 mb-2">Phiếu điểm Liên Đoàn</p>
+                            <img src="${student.scorecard_federation || 'https://placehold.co/200x150/e5e7eb/4b5563?text=N/A'}" alt="Phiếu điểm liên đoàn" class="w-full h-auto object-cover rounded-md shadow-sm" onerror="this.onerror=null;this.src='https://placehold.co/200x150/e5e7eb/4b5563?text=N/A'">
+                            <button onclick="downloadImage('${student.scorecard_federation}', '${student.student_code || 'N/A'}_phieu_diem_lien_doan.png')" class="mt-2 px-4 py-2 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 transition-colors">Tải ảnh về</button>
+                        </div>
+                    </div>
+                `;
+                detailsModal.classList.remove('hidden');
+                detailsModal.classList.add('flex');
+            }
+
+            // Show/Hide Sections
+            function showSection(section) {
+                dashboardSection.classList.add('hidden');
+                formSection.classList.add('hidden');
+                exercisesSection.classList.add('hidden');
+
+                showDashboardButton.classList.remove('bg-blue-600', 'text-white');
+                showDashboardButton.classList.add('bg-gray-200', 'text-gray-700');
+                showFormButton.classList.remove('bg-blue-600', 'text-white');
+                showFormButton.classList.add('bg-gray-200', 'text-gray-700');
+                showExercisesButton.classList.remove('bg-blue-600', 'text-white');
+                showExercisesButton.classList.add('bg-gray-200', 'text-gray-700');
+
+                if (section === 'dashboard') {
+                    dashboardSection.classList.remove('hidden');
+                    showDashboardButton.classList.add('bg-blue-600', 'text-white');
+                    showDashboardButton.classList.remove('bg-gray-200', 'text-gray-700');
+                } else if (section === 'form') {
+                    formSection.classList.remove('hidden');
+                    showFormButton.classList.add('bg-blue-600', 'text-white');
+                    showFormButton.classList.remove('bg-gray-200', 'text-gray-700');
+                } else if (section === 'exercises') {
+                    exercisesSection.classList.remove('hidden');
+                    showExercisesButton.classList.add('bg-blue-600', 'text-white');
+                    showExercisesButton.classList.remove('bg-gray-200', 'text-gray-700');
+                }
+            }
+
+            showDashboardButton.addEventListener('click', () => {
+                fetchStudents(); // Fetch data when navigating to dashboard
+                showSection('dashboard');
+            });
+            showFormButton.addEventListener('click', () => {
+                form.reset();
+                studentIdInput.value = '';
+                formTitle.textContent = 'Thêm Võ Sinh Mới';
+                submitButton.textContent = 'Thêm Võ Sinh';
+                cancelButton.classList.add('hidden');
+                document.querySelectorAll('img[id^="preview-"]').forEach(img => img.classList.add('hidden'));
+
+                // Tự động sinh mã võ sinh và điền vào trường khi thêm mới
+                document.getElementById('student-code').value = generateUniqueCode();
+                document.getElementById('student-code').readOnly = true;
+                document.getElementById('progress-container-placeholder').innerHTML = '';
+                showSection('form');
+            });
+
+            showExercisesButton.addEventListener('click', () => {
+                fetchExercises();
+                showSection('exercises');
+            });
+
+            // --- CRUD for Exercises ---
+            exerciseForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const exerciseId = exerciseIdInput.value;
+                const action = exerciseId ? 'update_exercise' : 'add_exercise';
+                const data = new FormData(exerciseForm);
+                data.append('_action', action);
+                if (exerciseId) {
+                    data.append('id', exerciseId);
+                }
+
+                try {
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        body: data
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        showMessage("Thành công", `Đã ${exerciseId ? 'cập nhật' : 'thêm'} bài tập.`);
+                        exerciseForm.reset();
+                        exerciseIdInput.value = '';
+                        addExerciseButton.textContent = 'Thêm Bài Tập';
+                        cancelExerciseButton.classList.add('hidden');
+                        fetchExercises(); // Thêm dòng này
+                    } else {
+                        showMessage("Lỗi", `Đã xảy ra lỗi: ${result.message}`);
+                    }
+                } catch (error) {
+                    showMessage("Lỗi", `Đã xảy ra lỗi khi lưu bài tập: ${error.message}`);
+                }
+            });
+
+            cancelExerciseButton.addEventListener('click', () => {
+                exerciseForm.reset();
+                exerciseIdInput.value = '';
+                addExerciseButton.textContent = 'Thêm Bài Tập';
+                cancelExerciseButton.classList.add('hidden');
+            });
+
+            async function fetchExercises() {
+                exerciseListContainer.innerHTML = '<p class="text-gray-500 text-center">Đang tải danh sách bài tập...</p>';
+                try {
+                    const response = await fetch(`${API_URL}?_action=get_all_exercises`);
+                    const result = await response.json();
+                    if (result.success) {
+                        allExercises = result.data; // Lưu toàn bộ dữ liệu vào biến
+                        displayExercises(allExercises); // Hiển thị toàn bộ dữ liệu lần đầu
+                        exerciseCountDisplay.textContent = `Tổng số bài tập: ${allExercises.length}`; // Thêm dòng này
+                    } else {
+                        exerciseListContainer.innerHTML = `<p class="text-gray-500 text-center">Lỗi: ${result.message}</p>`;
+                        exerciseCountDisplay.textContent = `Tổng số bài tập: 0`; // Thêm dòng này khi có lỗi
+                    }
+                } catch (error) {
+                    console.error("Error fetching exercises:", error);
+                    exerciseListContainer.innerHTML = `<p class="text-gray-500 text-center">Lỗi khi tải dữ liệu bài tập.</p>`;
+                    exerciseCountDisplay.textContent = `Tổng số bài tập: 0`; // Thêm dòng này khi có lỗi
+                }
+            }
+
+            function displayExercises(exercises) {
+                exerciseListContainer.innerHTML = '';
+                if (exercises.length === 0) {
+                    exerciseListContainer.innerHTML = '<p class="text-gray-500 text-center">Chưa có bài tập nào được thêm.</p>';
+                    return;
+                }
+
+                // Hàm để cập nhật tiến độ lên server
+                async function updateProgress(e) {
+                    const checkbox = e.target;
+                    const studentId = checkbox.dataset.studentId;
+                    const exerciseId = checkbox.dataset.exerciseId;
+                    const isCompleted = checkbox.checked;
+
+                    const data = new FormData();
+                    data.append('_action', 'update_progress');
+                    data.append('student_id', studentId);
+                    data.append('exercise_id', exerciseId);
+                    data.append('is_completed', isCompleted ? 1 : 0);
+
+                    try {
+                        const response = await fetch(API_URL, {
+                            method: 'POST',
+                            body: data
+                        });
+                        const result = await response.json();
+
+                        if (result.success) {
+                            const currentStudent = allStudents.find(s => s.id == studentId);
+                            if (currentStudent) {
+                                fetchStudentProgress(currentStudent.id, currentStudent.belt);
+                            }
+                        } else {
+                            showMessage("Lỗi", `Cập nhật tiến độ thất bại: ${result.message}`);
+                            checkbox.checked = !isCompleted; // Revert checkbox state
+                        }
+                    } catch (error) {
+                        showMessage("Lỗi", `Đã xảy ra lỗi khi gửi yêu cầu: ${error.message}`);
+                        checkbox.checked = !isCompleted; // Revert checkbox state
+                    }
+                }
+                const tableHtml = `
+        <div class="overflow-x-auto bg-white rounded-lg shadow">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">STT</th> 
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên Bài Tập</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cấp Đai</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Loại</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">URL Hướng dẫn</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    ${exercises.map((exercise, index) => `
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${index + 1}</td> 
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${exercise.name}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${exercise.belt}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${exercise.type === 'uniform' ? 'Môn Phái' : 'Liên đoàn'}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                ${exercise.guide_url ? `<a href="${exercise.guide_url}" target="_blank" class="text-blue-600 hover:text-blue-900">Xem</a>` : 'N/A'}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium flex space-x-2">
+                                <button class="edit-exercise-btn text-yellow-600 hover:text-yellow-900" data-id="${exercise.id}">Sửa</button>
+                                <button class="delete-exercise-btn text-red-600 hover:text-red-900" data-id="${exercise.id}">Xóa</button>
+                            </td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        </div>
+    `;
+                exerciseListContainer.innerHTML = tableHtml;
+            }
+            async function fetchStudentProgressForEdit(studentId, belt) {
+                const progressList = document.getElementById('edit-exercise-progress-list');
+                const progressText = document.getElementById('edit-progress-text');
+                const progressFill = document.getElementById('edit-progress-fill');
+                const progressInfo = document.getElementById('edit-progress-info');
+
+                progressList.innerHTML = '';
+                progressText.textContent = '0%';
+                progressFill.style.height = '0%';
+                progressInfo.textContent = 'Đang tải tiến độ...';
+
+                try {
+                    const response = await fetch(`${API_URL}?_action=get_student_progress&student_id=${studentId}&belt=${encodeURIComponent(belt)}`);
+                    const result = await response.json();
+
+                    if (result.success) {
+                        const exercises = result.data;
+                        if (exercises.length === 0) {
+                            progressInfo.textContent = 'Không có bài tập nào cho cấp đai này.';
+                            return;
+                        }
+
+                        let completedCount = 0;
+                        const tableHtml = `
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-2 py-2 text-left text-sm font-medium text-gray-500">STT</th>
+                                <th class="px-2 py-2 text-left text-sm font-medium text-gray-500">Tên bài tập</th>
+                                <th class="px-2 py-2 text-center text-sm font-medium text-gray-500">Hoàn thành</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            ${exercises.map((ex, index) => {
+                            const isChecked = ex.is_completed == 1;
+                            if (isChecked) completedCount++;
+                            return `
+                                    <tr>
+                                        <td class="px-2 py-2 whitespace-nowrap text-sm text-gray-500">${index + 1}</td>
+                                        <td class="px-2 py-2 whitespace-nowrap text-sm font-medium text-gray-900">${ex.name}</td>
+                                        <td class="px-2 py-2 whitespace-nowrap text-center text-sm text-gray-500">
+                                            <input type="checkbox" class="progress-checkbox h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" data-student-id="${studentId}" data-exercise-id="${ex.id}" ${isChecked ? 'checked' : ''}>
+                                        </td>
+                                    </tr>
+                                `;
+                        }).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+                        progressList.innerHTML = tableHtml;
+
+                        const percentage = Math.round((completedCount / exercises.length) * 100).toFixed(2);
+                        progressText.textContent = `${percentage}%`;
+                        progressFill.style.height = `${percentage}%`;
+                        progressInfo.textContent = `Đã hoàn thành ${completedCount} trên tổng số ${exercises.length} bài tập.`;
+
+                        document.querySelectorAll('#edit-exercise-progress-list .progress-checkbox').forEach(checkbox => {
+                            checkbox.addEventListener('change', updateProgress);
+                        });
+                    } else {
+                        progressInfo.textContent = `Lỗi: ${result.message}`;
+                    }
+                } catch (error) {
+                    progressInfo.textContent = `Đã xảy ra lỗi khi tải tiến độ.`;
+                    console.error("Error fetching progress:", error);
+                }
+            }
+            async function fetchStudentProgress(studentId, belt) {
+                const progressList = document.getElementById('exercise-progress-list');
+                const progressText = document.getElementById('progress-text');
+                const progressFill = document.getElementById('progress-fill');
+                const progressInfo = document.getElementById('progress-info');
+
+                progressList.innerHTML = '';
+                progressText.textContent = '0%';
+                progressFill.style.height = '0%';
+                progressInfo.textContent = 'Đang tải tiến độ...';
+
+                try {
+                    const response = await fetch(`${API_URL}?_action=get_student_progress&student_id=${studentId}&belt=${encodeURIComponent(belt)}`);
+                    const result = await response.json();
+
+                    if (result.success) {
+                        const exercises = result.data;
+                        if (exercises.length === 0) {
+                            progressInfo.textContent = 'Không có bài tập nào cho cấp đai này.';
+                            return;
+                        }
+
+                        let completedCount = 0;
+                        progressList.innerHTML = `
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-2 py-2 text-left text-sm font-medium text-gray-500">STT</th>
+                            <th class="px-2 py-2 text-left text-sm font-medium text-gray-500">Tên bài tập</th>
+                            <th class="px-2 py-2 text-center text-sm font-medium text-gray-500">Hoàn thành</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        ${exercises.map((ex, index) => {
+                            const isChecked = ex.is_completed == 1;
+                            if (isChecked) completedCount++;
+                            return `
+                                <tr>
+                                    <td class="px-2 py-2 whitespace-nowrap text-sm text-gray-500">${index + 1}</td>
+                                    <td class="px-2 py-2 whitespace-nowrap text-sm font-medium text-gray-900">${ex.name}</td>
+                                    <td class="px-2 py-2 whitespace-nowrap text-center text-sm text-gray-500">
+                                        <input type="checkbox" class="progress-checkbox h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" data-student-id="${studentId}" data-exercise-id="${ex.id}" ${isChecked ? 'checked' : ''}>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            `;
+
+                        const percentage = Math.round((completedCount / exercises.length) * 100).toFixed(2);
+                        progressText.textContent = `${percentage}%`;
+                        progressFill.style.height = `${percentage}%`;
+                        progressInfo.textContent = `Đã hoàn thành ${completedCount} trên tổng số ${exercises.length} bài tập.`;
+
+                        document.querySelectorAll('.progress-checkbox').forEach(checkbox => {
+                            checkbox.addEventListener('change', updateProgress);
+                        });
+                    } else {
+                        progressInfo.textContent = `Lỗi: ${result.message}`;
+                    }
+                } catch (error) {
+                    progressInfo.textContent = `Đã xảy ra lỗi khi tải tiến độ.`;
+                    console.error("Error fetching progress:", error);
+                }
+            }
+
+
+            // --- CRUD for Students ---
+            searchInput.addEventListener('input', () => {
+                const searchTerm = searchInput.value.toLowerCase();
+                const filteredStudents = allStudents.filter(student => {
+                    const name = (student.name || '').toLowerCase();
+                    const code = (student.student_code || '').toLowerCase();
+                    const idCard = (student.id_card || '').toLowerCase();
+                    const pob = (student.pob || '').toLowerCase();
+                    const address = (student.address || '').toLowerCase();
+                    const phoneNumber = (student.phone_number || '').toLowerCase();
+                    const coach = (student.coach || '').toLowerCase();
+                    const education = (student.education_level || '').toLowerCase();
+
+                    return name.includes(searchTerm) ||
+                        code.includes(searchTerm) ||
+                        idCard.includes(searchTerm) ||
+                        pob.includes(searchTerm) ||
+                        address.includes(searchTerm) ||
+                        phoneNumber.includes(searchTerm) ||
+                        coach.includes(searchTerm) ||
+                        education.includes(searchTerm);
+                });
+                displayStudents(filteredStudents);
+            });
+            async function deleteStudent(id) {
+                if (!confirm("Bạn có chắc chắn muốn xóa võ sinh này?")) return;
+                try {
+                    const data = new FormData();
+                    data.append('_action', 'delete');
+                    data.append('id', id);
+
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        body: data
+                    });
+                    const result = await response.json();
+
+                    if (result.success) {
+                        showMessage("Thành công", "Đã xóa võ sinh.");
+                        fetchStudents(); // Refresh data
+                        fetchFilterOptions(); // Refresh filter options
+                    } else {
+                        showMessage("Lỗi", `Đã xảy ra lỗi: ${result.message}`);
+                    }
+                } catch (error) {
+                    showMessage("Lỗi", `Đã xảy ra lỗi khi xóa võ sinh: ${error.message}`);
+                    console.error("Error deleting student:", error);
+                }
+            }
+
+            // Function to set up the form for editing
+            // Function to set up the form for editing
+            // Function to set up the form for editing
+            function editStudent(student) {
+                // Reset the placeholder content first to avoid duplication
+                document.getElementById('progress-container-placeholder').innerHTML = '';
+
+                document.getElementById('student-code').value = student.student_code || '';
+                document.getElementById('student-code').readOnly = true;
+                document.getElementById('student-name').value = student.name;
+                document.getElementById('student-dharma').value = student.dharma_name || '';
+                document.getElementById('student-gender').value = student.gender || '';
+                document.getElementById('student-dob').value = student.dob;
+                document.getElementById('student-idcard').value = student.id_card || '';
+                document.getElementById('student-pob').value = student.pob || '';
+                document.getElementById('student-address').value = student.address || '';
+                document.getElementById('student-phone').value = student.phone_number || '';
+                document.getElementById('student-club').value = student.club || '';
+                document.getElementById('student-coach').value = student.coach || '';
+                document.getElementById('student-education').value = student.education_level || '';
+
+                // Cập nhật trạng thái checkbox từ dữ liệu DB
+                document.getElementById('promotion-test-uniform').checked = student.promotion_test_uniform == 1;
+                document.getElementById('promotion-test-federation').checked = student.promotion_test_federation == 1;
+
+                document.getElementById('student-belt').value = student.belt || '';
+                document.getElementById('student-federation-belt').value = student.federation_belt || '';
+                document.getElementById('student-status').value = student.status || 'Đã Nhập Môn';
+                studentIdInput.value = student.id;
+
+                // Show preview images if URLs exist
+                document.getElementById('preview-photo-uniform').src = student.photo_uniform;
+                document.getElementById('preview-photo-uniform').classList.toggle('hidden', !student.photo_uniform);
+                document.getElementById('preview-photo-federation').src = student.photo_federation;
+                document.getElementById('preview-photo-federation').classList.toggle('hidden', !student.photo_federation);
+                document.getElementById('preview-diploma-uniform').src = student.diploma_uniform;
+                document.getElementById('preview-diploma-uniform').classList.toggle('hidden', !student.diploma_uniform);
+                document.getElementById('preview-diploma-federation').src = student.diploma_federation;
+                document.getElementById('preview-diploma-federation').classList.toggle('hidden', !student.diploma_federation);
+                document.getElementById('preview-scorecard-uniform').src = student.scorecard_uniform;
+                document.getElementById('preview-scorecard-uniform').classList.toggle('hidden', !student.scorecard_uniform);
+                document.getElementById('preview-scorecard-federation').src = student.scorecard_federation;
+                document.getElementById('preview-scorecard-federation').classList.toggle('hidden', !student.scorecard_federation);
+
+                formTitle.textContent = 'Sửa Thông Tin Võ Sinh';
+                submitButton.textContent = 'Lưu Thay Đổi';
+                cancelButton.classList.remove('hidden');
+
+                const progressPlaceholder = document.getElementById('progress-container-placeholder');
+                progressPlaceholder.innerHTML = `
+        <h4 class="text-xl font-bold text-gray-900 mb-4">Tiến Độ Thi Thăng Đai (${student.belt || 'N/A'})</h4>
+        <div class="flex items-center space-x-6">
+            <div class="flex flex-col items-center">
+                <div class="progress-container">
+                    <div id="edit-progress-fill" class="progress-fill"></div>
+                </div>
+                <span id="edit-progress-text" class="mt-2 text-lg font-bold text-gray-700">0%</span>
+            </div>
+            <div class="flex-grow">
+                <p class="text-sm text-gray-500 mb-2" id="edit-progress-info">Đang tải tiến độ...</p>
+                <div id="edit-exercise-progress-list" class="space-y-2">
+                    </div>
+            </div>
+        </div>
+        <div class="col-span-1 md:col-span-2 flex justify-end mt-4">
+    <button type="button" id="save-progress-button" class="px-6 py-2 rounded-md font-semibold text-white bg-green-600 hover:bg-green-700 transition-colors">
+        Lưu Tiến Độ
+    </button>
+</div>
+    `;
+
+                showSection('form');
+
+                // Tải tiến độ sau khi form đã được hiển thị
+                if (student.belt) {
+                    fetchStudentProgressForEdit(student.id, student.belt);
+                }
+            }
+
+            // Handle cancel button
+            cancelButton.addEventListener('click', () => {
+                form.reset();
+                studentIdInput.value = '';
+                formTitle.textContent = 'Thêm Võ Sinh Mới';
+                submitButton.textContent = 'Thêm Võ Sinh';
+                cancelButton.classList.add('hidden');
+                document.querySelectorAll('img[id^="preview-"]').forEach(img => img.classList.add('hidden'));
+                document.getElementById('progress-container-placeholder').innerHTML = '';
+                showSection('dashboard');
+            });
+
+            // Show student details in modal
+            function showStudentDetails(student) {
+                detailsContent.innerHTML = `
+        <h3 class="text-2xl font-bold text-gray-900 mb-4">${student.name}</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-4 gap-x-8 text-gray-700">
+            <div><span class="font-semibold">Mã Võ Sinh:</span> ${student.student_code || 'N/A'}</div>
+            <div><span class="font-semibold">Pháp Danh:</span> ${student.dharma_name || 'N/A'}</div>
+            <div><span class="font-semibold">Giới tính:</span> ${student.gender || 'N/A'}</div>
+            <div><span class="font-semibold">Ngày Sinh:</span> ${student.dob ? new Date(student.dob).toLocaleDateString('vi-VN') : 'N/A'}</div>
+            <div><span class="font-semibold">CCCD:</span> ${student.id_card || 'N/A'}</div>
+            <div><span class="font-semibold">Nơi Sinh:</span> ${student.pob || 'N/A'}</div>
+            <div><span class="font-semibold">Nơi Ở:</span> ${student.address || 'N/A'}</div>
+            <div><span class="font-semibold">Số điện thoại:</span> ${student.phone_number || 'N/A'}</div>
+            <div><span class="font-semibold">Võ đường:</span> ${student.club || 'N/A'}</div>
+            <div><span class="font-semibold">Huấn luyện viên:</span> ${student.coach || 'N/A'}</div>
+            <div><span class="font-semibold">Trình độ học vấn:</span> ${student.education_level || 'N/A'}</div>
+            <div><span class="font-semibold">Cấp Đai Môn Phái:</span> ${student.belt || 'N/A'}</div>
+            <div><span class="font-semibold">Cấp Đai Liên Đoàn:</span> ${student.federation_belt || 'N/A'}</div>
+            <div><span class="font-semibold">Trạng Thái:</span> ${student.status || 'N/A'}</div>
+            <div><span class="font-semibold">Đăng ký thi Môn phái:</span> ${student.promotion_test_uniform == 1 ? 'Đã đăng ký' : 'Chưa đăng ký'}</div>
+            <div><span class="font-semibold">Đăng ký thi Liên đoàn:</span> ${student.promotion_test_federation == 1 ? 'Đã đăng ký' : 'Chưa đăng ký'}</div>
+        </div>
+
+        <div class="mt-8">
+            <h4 class="text-xl font-bold text-gray-900 mb-4">Tiến Độ Thi Thăng Đai (${student.belt || 'N/A'})</h4>
+            <div class="flex items-center space-x-6">
+                <div class="flex flex-col items-center">
+                    <div class="progress-container">
+                        <div id="progress-fill" class="progress-fill"></div>
+                    </div>
+                    <span id="progress-text" class="mt-2 text-lg font-bold text-gray-700">0%</span>
+                </div>
+                <div class="flex-grow">
+                    <p class="text-sm text-gray-500 mb-2" id="progress-info">Đang tải tiến độ...</p>
+                    <div id="exercise-progress-list" class="space-y-2">
+                        </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 mt-6 text-center">
+            <div>
+                <p class="text-sm font-medium text-gray-500 mb-2">Ảnh Thẻ Môn Phái</p>
+                <img src="${student.photo_uniform || 'https://placehold.co/150x200/e5e7eb/4b5563?text=N/A'}" alt="Ảnh thẻ môn phái" class="w-full h-auto object-cover rounded-md shadow-sm" onerror="this.onerror=null;this.src='https://placehold.co/150x200/e5e7eb/4b5563?text=N/A'">
+                <button onclick="downloadImage('${student.photo_uniform}', '${student.student_code || 'N/A'}_anh_the_mon_phai.png')" class="mt-2 px-4 py-2 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 transition-colors">Tải ảnh về</button>
+            </div>
+            <div>
+                <p class="text-sm font-medium text-gray-500 mb-2">Ảnh Thẻ Liên Đoàn</p>
+                <img src="${student.photo_federation || 'https://placehold.co/150x200/e5e7eb/4b5563?text=N/A'}" alt="Ảnh thẻ liên đoàn" class="w-full h-auto object-cover rounded-md shadow-sm" onerror="this.onerror=null;this.src='https://placehold.co/150x200/e5e7eb/4b5563?text=N/A'">
+                <button onclick="downloadImage('${student.photo_federation}', '${student.student_code || 'N/A'}_anh_the_lien_doan.png')" class="mt-2 px-4 py-2 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 transition-colors">Tải ảnh về</button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 mt-4 text-center">
+            <div>
+                <p class="text-sm font-medium text-gray-500 mb-2">Văn Bằng Cũ Môn Phái</p>
+                <img src="${student.diploma_uniform || 'https://placehold.co/200x150/e5e7eb/4b5563?text=N/A'}" alt="Văn bằng môn phái" class="w-full h-auto object-cover rounded-md shadow-sm" onerror="this.onerror=null;this.src='https://placehold.co/200x150/e5e7eb/4b5563?text=N/A'">
+                <button onclick="downloadImage('${student.diploma_uniform}', '${student.student_code || 'N/A'}_van_bang_mon_phai.png')" class="mt-2 px-4 py-2 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 transition-colors">Tải ảnh về</button>
+            </div>
+            <div>
+                <p class="text-sm font-medium text-gray-500 mb-2">Văn Bằng Cũ Liên Đoàn</p>
+                <img src="${student.diploma_federation || 'https://placehold.co/200x150/e5e7eb/4b5563?text=N/A'}" alt="Văn bằng liên đoàn" class="w-full h-auto object-cover rounded-md shadow-sm" onerror="this.onerror=null;this.src='https://placehold.co/200x150/e5e7eb/4b5563?text=N/A'">
+                <button onclick="downloadImage('${student.diploma_federation}', '${student.student_code || 'N/A'}_van_bang_lien_doan.png')" class="mt-2 px-4 py-2 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 transition-colors">Tải ảnh về</button>
+            </div>
+            <div>
+                <p class="text-sm font-medium text-gray-500 mb-2">Phiếu điểm Môn Phái</p>
+                <img src="${student.scorecard_uniform || 'https://placehold.co/200x150/e5e7eb/4b5563?text=N/A'}" alt="Phiếu điểm môn phái" class="w-full h-auto object-cover rounded-md shadow-sm" onerror="this.onerror=null;this.src='https://placehold.co/200x150/e5e7eb/4b5563?text=N/A'">
+                <button onclick="downloadImage('${student.scorecard_uniform}', '${student.student_code || 'N/A'}_phieu_diem_mon_phai.png')" class="mt-2 px-4 py-2 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 transition-colors">Tải ảnh về</button>
+            </div>
+            <div>
+                <p class="text-sm font-medium text-gray-500 mb-2">Phiếu điểm Liên Đoàn</p>
+                <img src="${student.scorecard_federation || 'https://placehold.co/200x150/e5e7eb/4b5563?text=N/A'}" alt="Phiếu điểm liên đoàn" class="w-full h-auto object-cover rounded-md shadow-sm" onerror="this.onerror=null;this.src='https://placehold.co/200x150/e5e7eb/4b5563?text=N/A'">
+                <button onclick="downloadImage('${student.scorecard_federation}', '${student.student_code || 'N/A'}_phieu_diem_lien_doan.png')" class="mt-2 px-4 py-2 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 transition-colors">Tải ảnh về</button>
+            </div>
+        </div>
+    `;
+                detailsModal.classList.remove('hidden');
+                detailsModal.classList.add('flex');
+
+                // Thêm lời gọi hàm fetchStudentProgress để hiển thị tiến độ bài tập
+                if (student.belt) {
+                    fetchStudentProgress(student.id, student.belt);
+                }
+            }
+            // Show/Hide Sections
+            function showSection(section) {
+                dashboardSection.classList.add('hidden');
+                formSection.classList.add('hidden');
+                exercisesSection.classList.add('hidden');
+
+                showDashboardButton.classList.remove('bg-blue-600', 'text-white');
+                showDashboardButton.classList.add('bg-gray-200', 'text-gray-700');
+                showFormButton.classList.remove('bg-blue-600', 'text-white');
+                showFormButton.classList.add('bg-gray-200', 'text-gray-700');
+                showExercisesButton.classList.remove('bg-blue-600', 'text-white');
+                showExercisesButton.classList.add('bg-gray-200', 'text-gray-700');
+
+                if (section === 'dashboard') {
+                    dashboardSection.classList.remove('hidden');
+                    showDashboardButton.classList.add('bg-blue-600', 'text-white');
+                    showDashboardButton.classList.remove('bg-gray-200', 'text-gray-700');
+                } else if (section === 'form') {
+                    formSection.classList.remove('hidden');
+                    showFormButton.classList.add('bg-blue-600', 'text-white');
+                    showFormButton.classList.remove('bg-gray-200', 'text-gray-700');
+                } else if (section === 'exercises') {
+                    exercisesSection.classList.remove('hidden');
+                    showExercisesButton.classList.add('bg-blue-600', 'text-white');
+                    showExercisesButton.classList.remove('bg-gray-200', 'text-gray-700');
+                }
+            }
+
+            showDashboardButton.addEventListener('click', () => {
+                fetchStudents(); // Fetch data when navigating to dashboard
+                showSection('dashboard');
+            });
+            showFormButton.addEventListener('click', () => {
+                form.reset();
+                studentIdInput.value = '';
+                formTitle.textContent = 'Thêm Võ Sinh Mới';
+                submitButton.textContent = 'Thêm Võ Sinh';
+                cancelButton.classList.add('hidden');
+                document.querySelectorAll('img[id^="preview-"]').forEach(img => img.classList.add('hidden'));
+
+                // Tự động sinh mã võ sinh và điền vào trường khi thêm mới
+                document.getElementById('student-code').value = generateUniqueCode();
+                document.getElementById('student-code').readOnly = true;
+
+                showSection('form');
+            });
+
+            showExercisesButton.addEventListener('click', () => {
+                fetchExercises();
+                showSection('exercises');
+            });
+
+            // async function fetchExercises() {
+            //     exerciseListContainer.innerHTML = '<p class="text-gray-500 text-center">Đang tải danh sách bài tập...</p>';
+            //     try {
+            //         const response = await fetch(`${API_URL}?_action=get_all_exercises`);
+            //         const result = await response.json();
+            //         if (result.success) {
+            //             displayExercises(result.data);
+            //         } else {
+            //             exerciseListContainer.innerHTML = `<p class="text-gray-500 text-center">Lỗi: ${result.message}</p>`;
+            //         }
+            //     } catch (error) {
+            //         console.error("Error fetching exercises:", error);
+            //         exerciseListContainer.innerHTML = `<p class="text-gray-500 text-center">Lỗi khi tải dữ liệu bài tập.</p>`;
+            //     }
+            // }
+
+            // function displayExercises(exercises) {
+            //     exerciseListContainer.innerHTML = '';
+            //     if (exercises.length === 0) {
+            //         exerciseListContainer.innerHTML = '<p class="text-gray-500 text-center">Chưa có bài tập nào được thêm.</p>';
+            //         return;
+            //     }
+
+            //     const tableHtml = `
+            //         <div class="overflow-x-auto bg-white rounded-lg shadow">
+            //             <table class="min-w-full divide-y divide-gray-200">
+            //                 <thead class="bg-gray-50">
+            //                     <tr>
+            //                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">STT</th> 
+            //                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên Bài Tập</th>
+            //                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cấp Đai</th>
+            //                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Loại</th>
+            //                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">URL Hướng dẫn</th>
+            //                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hành động</th>
+            //                     </tr>
+            //                 </thead>
+            //                 <tbody class="bg-white divide-y divide-gray-200">
+            //                     ${exercises.map(exercise => `
+            //                         <tr>
+            //                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${index + 1}</td> 
+            //                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${exercise.name}</td>
+            //                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${exercise.belt}</td>
+            //                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${exercise.type === 'uniform' ? 'Môn Phái' : 'Liên đoàn'}</td>
+            //                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            //                                 ${exercise.guide_url ? `<a href="${exercise.guide_url}" target="_blank" class="text-blue-600 hover:text-blue-900">Xem</a>` : 'N/A'}
+            //                             </td>
+            //                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium flex space-x-2">
+            //                                 <button class="edit-exercise-btn text-yellow-600 hover:text-yellow-900" data-id="${exercise.id}">Sửa</button>
+            //                                 <button class="delete-exercise-btn text-red-600 hover:text-red-900" data-id="${exercise.id}">Xóa</button>
+            //                             </td>
+            //                         </tr>
+            //                     `).join('')}
+            //                 </tbody>
+            //             </table>
+            //         </div>
+            //     `;
+            //     exerciseListContainer.innerHTML = tableHtml;
+            // }
+
+            async function editExercise(id) {
+                try {
+                    const response = await fetch(`${API_URL}?_action=get_single_exercise&id=${id}`);
+                    const result = await response.json();
+                    if (result.success) {
+                        const exercise = result.data;
+                        document.getElementById('exercise-id').value = exercise.id;
+                        document.getElementById('exercise-name').value = exercise.name;
+                        document.getElementById('exercise-belt').value = exercise.belt;
+                        document.getElementById('exercise-type').value = exercise.type;
+                        document.getElementById('exercise-url').value = exercise.guide_url || '';
+                        addExerciseButton.textContent = 'Lưu Thay Đổi';
+                        cancelExerciseButton.classList.remove('hidden');
+                    } else {
+                        showMessage("Lỗi", `Không tìm thấy bài tập: ${result.message}`);
+                    }
+                } catch (error) {
+                    showMessage("Lỗi", `Đã xảy ra lỗi khi lấy thông tin bài tập: ${error.message}`);
+                }
+            }
+
+            async function deleteExercise(id) {
+                if (!confirm("Bạn có chắc chắn muốn xóa bài tập này?")) return;
+                try {
+                    const data = new FormData();
+                    data.append('_action', 'delete_exercise');
+                    data.append('id', id);
+                    const response = await fetch(API_URL, { method: 'POST', body: data });
+                    const result = await response.json();
+                    if (result.success) {
+                        showMessage("Thành công", "Đã xóa bài tập.");
+                        // Thêm dòng này để cập nhật lại danh sách bài tập ngay lập tức
+                        fetchExercises();
+                    } else {
+                        showMessage("Lỗi", `Lỗi khi xóa bài tập: ${result.message}`);
+                    }
+                } catch (error) {
+                    showMessage("Lỗi", `Đã xảy ra lỗi khi xóa bài tập: ${error.message}`);
+                }
+            }
+
+            // --- CRUD for Students ---
+            searchInput.addEventListener('input', () => {
+                const searchTerm = searchInput.value.toLowerCase();
+                const filteredStudents = allStudents.filter(student => {
+                    const name = (student.name || '').toLowerCase();
+                    const code = (student.student_code || '').toLowerCase();
+                    const idCard = (student.id_card || '').toLowerCase();
+                    const pob = (student.pob || '').toLowerCase();
+                    const address = (student.address || '').toLowerCase();
+                    const phoneNumber = (student.phone_number || '').toLowerCase();
+                    const coach = (student.coach || '').toLowerCase();
+                    const education = (student.education_level || '').toLowerCase();
+
+                    return name.includes(searchTerm) ||
+                        code.includes(searchTerm) ||
+                        idCard.includes(searchTerm) ||
+                        pob.includes(searchTerm) ||
+                        address.includes(searchTerm) ||
+                        phoneNumber.includes(searchTerm) ||
+                        coach.includes(searchTerm) ||
+                        education.includes(searchTerm);
+                });
+                displayStudents(filteredStudents);
+            });
+
+            async function deleteStudent(id) {
+                if (!confirm("Bạn có chắc chắn muốn xóa võ sinh này?")) return;
+                try {
+                    const data = new FormData();
+                    data.append('_action', 'delete');
+                    data.append('id', id);
+
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        body: data
+                    });
+                    const result = await response.json();
+
+                    if (result.success) {
+                        showMessage("Thành công", "Đã xóa võ sinh.");
+                        fetchStudents(); // Refresh data
+                        fetchFilterOptions(); // Refresh filter options
+                    } else {
+                        showMessage("Lỗi", `Đã xảy ra lỗi: ${result.message}`);
+                    }
+                } catch (error) {
+                    showMessage("Lỗi", `Đã xảy ra lỗi khi xóa võ sinh: ${error.message}`);
+                    console.error("Error deleting student:", error);
+                }
+            }
+
+            function displayStudents(students) {
+                studentList.innerHTML = '';
+                if (students.length === 0) {
+                    studentList.innerHTML = '<p class="text-gray-500 text-center">Không tìm thấy võ sinh nào phù hợp.</p>';
+                    return;
+                }
+
+                students.forEach((student, index) => {
+                    const studentDiv = document.createElement('div');
+                    studentDiv.className = 'data-card bg-white p-4 rounded-lg shadow-md flex items-center justify-between transition-transform transform hover:scale-[1.01]';
+                    studentDiv.dataset.id = student.id;
+                    const beltIcon = createBeltSVG(student.belt);
+                    const crownIcon = student.status === 'Đã Nhập Môn' ? `<i class="fas fa-crown text-yellow-500 ml-2"></i>` : '';
+
+                    let age = 'N/A';
+                    if (student.dob) {
+                        const birthDate = new Date(student.dob);
+                        const today = new Date();
+                        age = today.getFullYear() - birthDate.getFullYear();
+                        const monthDiff = today.getMonth() - birthDate.getMonth();
+                        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                            age--;
+                        }
+                    }
+
+                    const uniformPromotionIcon = student.promotion_test_uniform == 1 ? `<i class="fas fa-check-circle text-green-500" title="Đã đăng ký thi thăng đai Môn Phái"></i>` : '';
+                    const federationPromotionIcon = student.promotion_test_federation == 1 ? `<i class="fas fa-check-circle text-red-500" title="Đã đăng ký thi thăng đai Liên Đoàn"></i>` : '';
+
+                    studentDiv.innerHTML = `
+            <div class="flex-grow flex items-center space-x-4">
+                <span class="text-lg font-bold text-gray-400 w-8 flex-shrink-0">${index + 1}.</span>
+                <div class="student-photo-container">
+                    <img src="${student.photo_federation || 'https://placehold.co/64x64/e5e7eb/4b5563?text=N/A'}" alt="Ảnh thẻ liên đoàn" onerror="this.onerror=null;this.src='https://placehold.co/64x64/e5e7eb/4b5563?text=N/A'">
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-gray-800">${student.name} ${crownIcon}</h3>
+                    <p class="text-sm text-gray-600">
+                        Mã: <span class="font-medium">${student.student_code || 'N/A'}</span>
+                        | Tuổi: <span class="font-medium">${age}</span>
+                    </p>
+                    <p class="text-sm text-gray-600 mt-1">
+                        Võ đường: <span class="font-medium">${student.club || 'N/A'}</span>
+                    </p>
+                    <div class="flex items-center space-x-4 mt-1">
+                        <p class="text-sm text-gray-600 flex items-center space-x-2">
+                            <span>Cấp đai:</span>
+                            ${beltIcon}
+                        </p>
+                        <p class="text-sm text-gray-600 flex items-center space-x-2">
+                            ${uniformPromotionIcon}
+                            ${federationPromotionIcon}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="flex-shrink-0 flex items-center space-x-2">
+                <button class="edit-button bg-yellow-500 text-white rounded-md px-4 py-2 font-medium hover:bg-yellow-600 transition-colors" data-id="${student.id}">Sửa</button>
+                <button class="delete-button bg-red-500 text-white rounded-md px-4 py-2 font-medium hover:bg-red-600 transition-colors" data-id="${student.id}">Xóa</button>
+            </div>
+        `;
+                    studentList.appendChild(studentDiv);
+                });
+
+                document.querySelectorAll('.data-card').forEach(card => {
+                    card.addEventListener('click', async (e) => {
+                        if (e.target.tagName !== 'BUTTON') {
+                            const studentId = card.getAttribute('data-id');
+                            try {
+                                const response = await fetch(`${API_URL}?_action=get_single&id=${studentId}`);
+                                const result = await response.json();
+                                if (result.success) {
+                                    showStudentDetails(result.data);
+                                } else {
+                                    showMessage("Lỗi", `Không thể lấy thông tin võ sinh: ${result.message}`);
+                                }
+                            } catch (error) {
+                                showMessage("Lỗi", `Đã xảy ra lỗi khi lấy thông tin: ${error.message}`);
+                                console.error("Error fetching student details:", error);
+                            }
+                        }
+                    });
+                });
+
+                document.querySelectorAll('.edit-button').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const studentId = button.getAttribute('data-id');
+                        const student = allStudents.find(s => s.id == studentId);
+                        if (student) {
+                            editStudent(student);
+                        }
+                    });
+                });
+
+                document.querySelectorAll('.delete-button').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const studentId = button.getAttribute('data-id');
+                        deleteStudent(studentId);
+                    });
+                });
+            }
+
+            function generateUniqueCode() {
+                const characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                let code = '';
+                for (let i = 0; i < 8; i++) {
+                    code += characters.charAt(Math.floor(Math.random() * characters.length));
+                }
+                return 'PQQ' + code;
+            }
+
+            function createBeltSVG(belt) {
+                if (!belt) return '';
+                let svg = '';
+                if (belt.includes('Nâu Đai')) {
+                    svg = `<svg class="belt-icon brown" viewBox="0 0 48 12">
+                        <rect x="0" y="0" width="48" height="12" fill="none" />
+                        <rect x="0" y="0" width="48" height="12" fill="#A0522D" />
+                    </svg>`;
+                } else if (belt.includes('Cấp 1 - Lam Đai I')) {
+                    svg = `<svg class="belt-icon brown" viewBox="0 0 48 12">
+                        <rect x="0" y="0" width="48" height="12" fill="none" />
+                        <rect x="0" y="0" width="48" height="12" fill="#A0522D" />
+                        <rect x="36" y="0" width="3" height="12" fill="#22c55e" />
+                        <rect x="0" y="0" width="48" height="12" fill="none" stroke="#3b82f6" stroke-width="4" />
+                    </svg>`;
+                } else if (belt.includes('Cấp 2 - Lam Đai II')) {
+                    svg = `<svg class="belt-icon brown" viewBox="0 0 48 12">
+                        <rect x="0" y="0" width="48" height="12" fill="none" />
+                        <rect x="0" y="0" width="48" height="12" fill="#A0522D" />
+                        <rect x="36" y="0" width="3" height="12" fill="#22c55e" />
+                        <rect x="30" y="0" width="3" height="12" fill="#22c55e" />
+                        <rect x="0" y="0" width="48" height="12" fill="none" stroke="#3b82f6" stroke-width="4" />
+                    </svg>`;
+                }
+                else if (belt.includes('Cấp 3 - Lam Đai III')) {
+                    svg = `<svg class="belt-icon brown" viewBox="0 0 48 12">
+                        <rect x="0" y="0" width="48" height="12" fill="none" />
+                        <rect x="0" y="0" width="48" height="12" fill="#A0522D" />
+                        <rect x="36" y="0" width="3" height="12" fill="#22c55e" />
+                        <rect x="30" y="0" width="3" height="12" fill="#22c55e" />
+                        <rect x="24" y="0" width="3" height="12" fill="#22c55e" />
+                        <rect x="0" y="0" width="48" height="12" fill="none" stroke="#3b82f6" stroke-width="4" />
+                    </svg>`;
+                }
+                else if (belt.includes('Cấp 4 - Lam Đai IV')) {
+                    svg = `<svg class="belt-icon brown" viewBox="0 0 48 12">
+                        <rect x="0" y="0" width="48" height="12" fill="none" />
+                        <rect x="0" y="0" width="48" height="12" fill="#A0522D" />
+                        <rect x="36" y="0" width="3" height="12" fill="#22c55e" />
+                        <rect x="30" y="0" width="3" height="12" fill="#22c55e" />
+                        <rect x="24" y="0" width="3" height="12" fill="#22c55e" />
+                        <rect x="18" y="0" width="3" height="12" fill="#22c55e" />
+                        <rect x="0" y="0" width="48" height="12" fill="none" stroke="#3b82f6" stroke-width="4" />
+                    </svg>`;
+                }
+                else if (belt.includes('Cấp 5 - Lục Đai I')) {
+                    svg = `<svg class="belt-icon brown" viewBox="0 0 48 12">
+                        <rect x="0" y="0" width="48" height="12" fill="none" />
+                        <rect x="0" y="0" width="48" height="12" fill="#A0522D" />
+                        <rect x="36" y="0" width="3" height="12" fill="#ef4444" />
+                        <rect x="0" y="0" width="48" height="12" fill="none" stroke="#22c55e" stroke-width="4" />
+                    </svg>`;
+                }
+                else if (belt.includes('Cấp 6 - Lục Đai II')) {
+                    svg = `<svg class="belt-icon brown" viewBox="0 0 48 12">
+                        <rect x="0" y="0" width="48" height="12" fill="none" />
+                        <rect x="0" y="0" width="48" height="12" fill="#A0522D" />
+                        <rect x="36" y="0" width="3" height="12" fill="#ef4444" />
+                        <rect x="30" y="0" width="3" height="12" fill="#ef4444" />
+                        <rect x="0" y="0" width="48" height="12" fill="none" stroke="#22c55e" stroke-width="4" />
+                    </svg>`;
+                }
+                else if (belt.includes('Cấp 7 - Lục Đai III')) {
+                    svg = `<svg class="belt-icon brown" viewBox="0 0 48 12">
+                        <rect x="0" y="0" width="48" height="12" fill="none" />
+                        <rect x="0" y="0" width="48" height="12" fill="#A0522D" />
+                        <rect x="42" y="0" width="3" height="12" fill="#ef4444" />
+                        <rect x="36" y="0" width="3" height="12" fill="#ef4444" />
+                        <rect x="30" y="0" width="3" height="12" fill="#ef4444" />
+                        <rect x="0" y="0" width="48" height="12" fill="none" stroke="#22c55e" stroke-width="4" />
+                    </svg>`;
+                }
+                else if (belt.includes('Cấp 8 - Lục Đai IV')) {
+                    svg = `<svg class="belt-icon brown" viewBox="0 0 48 12">
+                        <rect x="0" y="0" width="48" height="12" fill="none" />
+                        <rect x="0" y="0" width="48" height="12" fill="#A0522D" />
+                        <rect x="42" y="0" width="3" height="12" fill="#ef4444" />
+                        <rect x="36" y="0" width="3" height="12" fill="#ef4444" />
+                        <rect x="30" y="0" width="3" height="12" fill="#ef4444" />
+                        <rect x="24" y="0" width="3" height="12" fill="#ef4444" />
+                        <rect x="0" y="0" width="48" height="12" fill="none" stroke="#22c55e" stroke-width="4" />
+                    </svg>`;
+                }
+                else if (belt.includes('Cấp 9 - Hồng đai I')) {
+                    svg = `<svg class="belt-icon brown-red-border" viewBox="0 0 48 12">
+                                <rect x="0" y="0" width="48" height="12" fill="#A0522D" />
+                                <rect x="36" y="0" width="3" height="12" fill="#facc15" />
+                                <rect x="0" y="0" width="48" height="12" fill="none" stroke="#ef4444" stroke-width="4" />
+                            </svg>`;
+                }
+                else if (belt.includes('Cấp 9 - Hồng đai thiếu niên I')) {
+                    svg = `<svg class="belt-icon brown-green-border" viewBox="0 0 48 12">
+                                <rect x="0" y="0" width="48" height="12" fill="#A0522D" />
+                                <rect x="1" y="0" width="48" height="12" fill="#ef4444" />
+                                <rect x="36" y="0" width="3" height="12" fill="#facc15" />
+                            </svg>`;
+                }
+                else if (belt.includes('Cấp 10 - Hồng đai II')) {
+                    svg = `<svg class="belt-icon brown-red-border" viewBox="0 0 48 12">
+                                <rect x="0" y="0" width="48" height="12" fill="#A0522D" />
+                                <rect x="36" y="0" width="3" height="12" fill="#facc15" />
+                                <rect x="42" y="0" width="3" height="12" fill="#facc15" />
+                                <rect x="0" y="0" width="48" height="12" fill="none" stroke="#ef4444" stroke-width="4" />
+                            </svg>`;
+                }
+                else if (belt.includes('Cấp 10 - Hồng đai thiếu niên II')) {
+                    svg = `<svg class="belt-icon brown-green-border" viewBox="0 0 48 12">
+                                <rect x="0" y="0" width="48" height="12" fill="#A0522D" />
+                                <rect x="1" y="0" width="48" height="12" fill="#ef4444" />
+                                <rect x="36" y="0" width="3" height="12" fill="#facc15" />
+                                <rect x="42" y="0" width="3" height="12" fill="#facc15" />
+                            </svg>`;
+                }
+                else if (belt.includes('Cấp 11 - Hồng đai III')) {
+                    svg = `<svg class="belt-icon brown-red-border" viewBox="0 0 48 12">
+                                <rect x="0" y="0" width="48" height="12" fill="#A0522D" />
+                                <rect x="30" y="0" width="3" height="12" fill="#facc15" />
+                                <rect x="36" y="0" width="3" height="12" fill="#facc15" />
+                                <rect x="42" y="0" width="3" height="12" fill="#facc15" />
+                                <rect x="0" y="0" width="48" height="12" fill="none" stroke="#ef4444" stroke-width="4" />
+                            </svg>`;
+                }
+                else if (belt.includes('Cấp 11 - Hồng đai thiếu niên III')) {
+                    svg = `<svg class="belt-icon brown-green-border" viewBox="0 0 48 12">
+                                <rect x="0" y="0" width="48" height="12" fill="#A0522D" />
+                                <rect x="1" y="0" width="48" height="12" fill="#ef4444" />
+                                <rect x="30" y="0" width="3" height="12" fill="#facc15" />
+                                <rect x="36" y="0" width="3" height="12" fill="#facc15" />
+                                <rect x="42" y="0" width="3" height="12" fill="#facc15" />
+                            </svg>`;
+                }
+                else if (belt.includes('Cấp 12 - Hồng đai IV')) {
+                    svg = `<svg class="belt-icon brown-red-border" viewBox="0 0 48 12">
+                                <rect x="0" y="0" width="48" height="12" fill="#A0522D" />
+                                <rect x="24" y="0" width="3" height="12" fill="#facc15" />
+                                <rect x="30" y="0" width="3" height="12" fill="#facc15" />
+                                <rect x="36" y="0" width="3" height="12" fill="#facc15" />
+                                <rect x="42" y="0" width="3" height="12" fill="#facc15" />
+                                <rect x="0" y="0" width="48" height="12" fill="none" stroke="#ef4444" stroke-width="4" />
+                            </svg>`;
+                }
+                else if (belt.includes('Cấp 12 - Hồng đai thiếu niên IV')) {
+                    svg = `<svg class="belt-icon brown-green-border" viewBox="0 0 48 12">
+                                <rect x="0" y="0" width="48" height="12" fill="#A0522D" />
+                                <rect x="1" y="0" width="48" height="12" fill="#ef4444" />
+                                <rect x="24" y="0" width="3" height="12" fill="#facc15" />
+                                <rect x="30" y="0" width="3" height="12" fill="#facc15" />
+                                <rect x="36" y="0" width="3" height="12" fill="#facc15" />
+                                <rect x="42" y="0" width="3" height="12" fill="#facc15" />
+                            </svg>`;
+                }
+                else if (belt.includes('Cấp 13 - Hoàng đai I')) {
+                    svg = `<svg class="belt-icon brown-red-border" viewBox="0 0 48 12">
+                                <rect x="0" y="0" width="48" height="12" fill="#A0522D" />
+                                <rect x="36" y="0" width="3" height="12" fill="#FFFFFF" />
+                                <rect x="0" y="0" width="48" height="12" fill="none" stroke="#facc15" stroke-width="4" />
+                            </svg>`;
+                }
+                else if (belt.includes('Cấp 13 - Hoàng đai thiếu niên I')) {
+                    svg = `<svg class="belt-icon brown-red-border" viewBox="0 0 48 12">
+                                <rect x="0" y="0" width="48" height="12" fill="#A0522D" />
+                                <rect x="6" y="0" width="35" height="12" fill="#facc15" />
+                                <rect x="36" y="0" width="3" height="12" fill="#FFFFFF" />
+                                <rect x="0" y="0" width="48" height="12" fill="none" stroke="#ef4444" stroke-width="4" />
+                            </svg>`;
+                }
+                else if (belt.includes('Cấp 14 - Hoàng đai II')) {
+                    svg = `<svg class="belt-icon brown-red-border" viewBox="0 0 48 12">
+                                <rect x="0" y="0" width="48" height="12" fill="#A0522D" />
+                                <rect x="36" y="0" width="3" height="12" fill="#FFFFFF" />
+                                <rect x="42" y="0" width="3" height="12" fill="#FFFFFF" />
+                                <rect x="0" y="0" width="48" height="12" fill="none" stroke="#facc15" stroke-width="4" />
+                            </svg>`;
+                }
+                else if (belt.includes('Cấp 14 - Hoàng đai thiếu niên II')) {
+                    svg = `<svg class="belt-icon brown-red-border" viewBox="0 0 48 12">
+                                <rect x="0" y="0" width="48" height="12" fill="#A0522D" />
+                                <rect x="6" y="0" width="35" height="12" fill="#facc15" />
+                                <rect x="32" y="0" width="3" height="12" fill="#FFFFFF" />
+                                <rect x="36" y="0" width="3" height="12" fill="#FFFFFF" />
+                                <rect x="0" y="0" width="48" height="12" fill="none" stroke="#ef4444" stroke-width="4" />
+                            </svg>`;
+                }
+                else if (belt.includes('Cấp 15 - Hoàng đai III')) {
+                    svg = `<svg class="belt-icon brown-red-border" viewBox="0 0 48 12">
+                                <rect x="0" y="0" width="48" height="12" fill="#A0522D" />
+                                <rect x="32" y="0" width="3" height="12" fill="#FFFFFF" />
+                                <rect x="36" y="0" width="3" height="12" fill="#FFFFFF" />
+                                <rect x="40" y="0" width="3" height="12" fill="#FFFFFF" />
+                                <rect x="0" y="0" width="48" height="12" fill="none" stroke="#facc15" stroke-width="4" />
+                            </svg>`;
+                }
+                else if (belt.includes('Cấp 15 - Hoàng đai thiếu niên III')) {
+                    svg = `<svg class="belt-icon brown-red-border" viewBox="0 0 48 12">
+                                <rect x="0" y="0" width="48" height="12" fill="#A0522D" />
+                                <rect x="6" y="0" width="35" height="12" fill="#facc15" />
+                                <rect x="28" y="0" width="3" height="12" fill="#FFFFFF" />
+                                <rect x="32" y="0" width="3" height="12" fill="#FFFFFF" />
+                                <rect x="36" y="0" width="3" height="12" fill="#FFFFFF" />
+                                <rect x="0" y="0" width="48" height="12" fill="none" stroke="#ef4444" stroke-width="4" />
+                            </svg>`;
+                }
+                else if (belt.includes('Cấp 16 - Hoàng đai IV')) {
+                    svg = `<svg class="belt-icon brown-red-border" viewBox="0 0 48 12">
+                                <rect x="0" y="0" width="48" height="12" fill="#A0522D" />
+                                <rect x="28" y="0" width="3" height="12" fill="#FFFFFF" />
+                                <rect x="32" y="0" width="3" height="12" fill="#FFFFFF" />
+                                <rect x="36" y="0" width="3" height="12" fill="#FFFFFF" />
+                                <rect x="40" y="0" width="3" height="12" fill="#FFFFFF" />
+                                <rect x="0" y="0" width="48" height="12" fill="none" stroke="#facc15" stroke-width="4" />
+                            </svg>`;
+                }
+                else if (belt.includes('Cấp 16 - Hoàng đai thiếu niên IV')) {
+                    svg = `<svg class="belt-icon brown-red-border" viewBox="0 0 48 12">
+                                <rect x="0" y="0" width="48" height="12" fill="#A0522D" />
+                                <rect x="6" y="0" width="35" height="12" fill="#facc15" />
+                                <rect x="24" y="0" width="3" height="12" fill="#FFFFFF" />
+                                <rect x="28" y="0" width="3" height="12" fill="#FFFFFF" />
+                                <rect x="32" y="0" width="3" height="12" fill="#FFFFFF" />
+                                <rect x="36" y="0" width="3" height="12" fill="#FFFFFF" />
+                                <rect x="0" y="0" width="48" height="12" fill="none" stroke="#ef4444" stroke-width="4" />
+                            </svg>`;
+                }
+                else if (belt.includes('Cấp 17 - Chuẩn Võ Sư')) {
+                    svg = `<svg class="belt-icon brown-white-border" viewBox="0 0 48 12">
+                                <rect x="0" y="0" width="48" height="12" fill="#A0522D" />
+                                <rect x="0" y="0" width="48" height="12" fill="none" stroke="#FFFFFF" stroke-width="4" />
+                            </svg>`;
+                }
+                return svg;
+            }
+        };
+    </script>
+</body>
+
+</html>
