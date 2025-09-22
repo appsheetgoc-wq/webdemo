@@ -472,6 +472,37 @@ case 'update_all_progress':
                 $students = [];
                 if ($result->num_rows > 0) {
                     while($row = $result->fetch_assoc()) {
+                        $student_id = $row['id'];
+    $student_belt = $row['belt'];
+
+    if (!empty($student_belt)) {
+        // Đếm tổng số bài tập cho cấp đai của võ sinh
+        $sql_total_exercises = "SELECT COUNT(*) as total FROM exercises WHERE belt = ?";
+        $stmt_total = $conn->prepare($sql_total_exercises);
+        $stmt_total->bind_param("s", $student_belt);
+        $stmt_total->execute();
+        $res_total = $stmt_total->get_result();
+        $total_exercises = $res_total->fetch_assoc()['total'];
+        $stmt_total->close();
+
+        // Đếm số bài tập đã hoàn thành
+        $sql_completed_exercises = "SELECT COUNT(*) as completed FROM student_exercises se JOIN exercises e ON se.exercise_id = e.id WHERE se.student_id = ? AND se.is_completed = 1 AND e.belt = ?";
+        $stmt_completed = $conn->prepare($sql_completed_exercises);
+        $stmt_completed->bind_param("is", $student_id, $student_belt);
+        $stmt_completed->execute();
+        $res_completed = $stmt_completed->get_result();
+        $completed_exercises = $res_completed->fetch_assoc()['completed'];
+        $stmt_completed->close();
+
+        // Tính toán phần trăm và thêm vào dữ liệu của võ sinh
+        $row['progress_percentage'] = ($total_exercises > 0) ? round(($completed_exercises / $total_exercises) * 100, 2) : 0;
+        $row['completed_exercises'] = $completed_exercises;
+        $row['total_exercises'] = $total_exercises;
+    } else {
+        $row['progress_percentage'] = 0;
+        $row['completed_exercises'] = 0;
+        $row['total_exercises'] = 0;
+    }
                         $students[] = $row;
                     }
                 }

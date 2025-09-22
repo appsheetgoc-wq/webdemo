@@ -2018,35 +2018,45 @@
 
                     studentDiv.innerHTML = `
             <div class="flex-grow flex items-center space-x-4">
-                <span class="text-lg font-bold text-gray-400 w-8 flex-shrink-0">${index + 1}.</span>
-                <div class="student-photo-container">
-                    <img src="${student.photo_federation || 'https://placehold.co/64x64/e5e7eb/4b5563?text=N/A'}" alt="Ảnh thẻ liên đoàn" onerror="this.onerror=null;this.src='https://placehold.co/64x64/e5e7eb/4b5563?text=N/A'">
-                </div>
-                <div>
-                    <h3 class="text-lg font-bold text-gray-800">${student.name} ${crownIcon}</h3>
-                    <p class="text-sm text-gray-600">
-                        Mã: <span class="font-medium">${student.student_code || 'N/A'}</span>
-                        | Tuổi: <span class="font-medium">${age}</span>
-                    </p>
-                    <p class="text-sm text-gray-600 mt-1">
-                        Võ đường: <span class="font-medium">${student.club || 'N/A'}</span>
-                    </p>
-                    <div class="flex items-center space-x-4 mt-1">
-                        <p class="text-sm text-gray-600 flex items-center space-x-2">
-                            <span>Cấp đai:</span>
-                            ${beltIcon}
-                        </p>
-                        <p class="text-sm text-gray-600 flex items-center space-x-2">
-                            ${uniformPromotionIcon}
-                            ${federationPromotionIcon}
-                        </p>
-                    </div>
-                </div>
-            </div>
-            <div class="flex-shrink-0 flex items-center space-x-2">
-                <button class="edit-button bg-yellow-500 text-white rounded-md px-4 py-2 font-medium hover:bg-yellow-600 transition-colors" data-id="${student.id}">Sửa</button>
-                <button class="delete-button bg-red-500 text-white rounded-md px-4 py-2 font-medium hover:bg-red-600 transition-colors" data-id="${student.id}">Xóa</button>
-            </div>
+    <span class="text-lg font-bold text-gray-400 w-8 flex-shrink-0">${index + 1}.</span>
+    <div class="student-photo-container">
+        <img src="${student.photo_federation || 'https://placehold.co/64x64/e5e7eb/4b5563?text=N/A'}" alt="Ảnh thẻ liên đoàn" onerror="this.onerror=null;this.src='https://placehold.co/64x64/e5e7eb/4b5563?text=N/A'">
+    </div>
+    <div>
+        <h3 class="text-lg font-bold text-gray-800">${student.name} ${crownIcon}</h3>
+        <p class="text-sm text-gray-600">
+            Mã: <span class="font-medium">${student.student_code || 'N/A'}</span>
+            | Tuổi: <span class="font-medium">${age}</span>
+        </p>
+        <p class="text-sm text-gray-600 mt-1">
+            Võ đường: <span class="font-medium">${student.club || 'N/A'}</span>
+        </p>
+        <div class="flex items-center space-x-4 mt-1">
+            <p class="text-sm text-gray-600 flex items-center space-x-2">
+                <span>Cấp đai:</span>
+                ${beltIcon}
+            </p>
+            <p class="text-sm text-gray-600 flex items-center space-x-2">
+                ${uniformPromotionIcon}
+                ${federationPromotionIcon}
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="flex-shrink-0 flex items-center space-x-4">
+    <div class="flex flex-col items-center">
+        <div class="progress-container">
+            <div class="progress-fill" style="height: ${student.progress_percentage || 0}%;"></div>
+        </div>
+        <span class="mt-2 text-sm font-bold text-gray-700">${student.progress_percentage || 0}%</span>
+        <span class="mt-1 text-xs text-gray-500">${student.completed_exercises || 0}/${student.total_exercises || 0}</span>
+    </div>
+    <div class="flex-shrink-0 flex items-center space-x-2">
+        <button class="edit-button bg-yellow-500 text-white rounded-md px-4 py-2 font-medium hover:bg-yellow-600 transition-colors" data-id="${student.id}">Sửa</button>
+        <button class="delete-button bg-red-500 text-white rounded-md px-4 py-2 font-medium hover:bg-red-600 transition-colors" data-id="${student.id}">Xóa</button>
+    </div>
+</div>
         `;
                     studentList.appendChild(studentDiv);
                 });
