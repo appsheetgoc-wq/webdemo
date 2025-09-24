@@ -19,8 +19,6 @@
         .data-card {
             cursor: pointer;
             transition: transform 0.2s;
-            /* Luôn là flex-col trên mobile */
-            @apply flex flex-col items-start space-y-4 p-4;
         }
 
         .data-card:hover {
@@ -29,12 +27,7 @@
         }
 
         .filter-select {
-            @apply px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm;
-        }
-        
-        /* Chắc chắn phần lọc luôn là một cột duy nhất */
-        .filter-section-mobile-grid {
-            @apply grid grid-cols-1 gap-4;
+            @apply px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm md:text-base;
         }
 
         .progress-container {
@@ -64,7 +57,6 @@
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             position: relative;
             border: 2px solid #34D399;
-            flex-shrink: 0;
         }
 
         .student-photo-container img {
@@ -127,15 +119,10 @@
         .belt-icon .stripe.right-2 {
             right: 14px;
         }
-
-        /* Thẻ hiển thị bài tập cho mobile */
-        .exercise-card {
-            @apply bg-white p-4 rounded-lg shadow-md space-y-2;
-        }
     </style>
 </head>
 
-<body class="bg-gray-100 min-h-screen flex flex-col items-center p-4 overflow-x-hidden">
+<body class="bg-gray-100 min-h-screen flex flex-col items-center p-4">
 
     <div id="message-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center p-4 z-50">
         <div class="bg-white rounded-lg shadow-xl p-6 max-w-sm w-full transform transition-transform scale-95">
@@ -150,7 +137,7 @@
 
     <div id="details-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center p-4 z-50">
         <div
-            class="bg-white rounded-xl shadow-2xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto transform transition-transform scale-95">
+            class="bg-white rounded-xl shadow-2xl p-6 md:p-8 w-full max-h-[90vh] overflow-y-auto transform transition-transform scale-95 md:max-w-4xl">
             <div class="flex justify-end mb-4">
                 <button id="details-close-button"
                     class="text-gray-500 hover:text-gray-700 text-3xl font-bold">×</button>
@@ -160,8 +147,8 @@
         </div>
     </div>
 
-    <div class="w-full max-w-screen-sm bg-white rounded-xl shadow-2xl p-6 my-4">
-        <h1 class="text-2xl font-extrabold text-center text-blue-800 mb-2">
+    <div class="w-full max-w-5xl bg-white rounded-xl shadow-2xl p-6 md:p-10 my-8">
+        <h1 class="text-3xl md:text-4xl font-extrabold text-center text-blue-800 mb-2">
             Quản Lý Võ Sinh
         </h1>
         <p class="text-center text-gray-600 mb-6">Môn phái Phật Quang Quyền</p>
@@ -171,34 +158,34 @@
 
         <hr class="border-t-2 border-gray-200 my-6">
 
-        <div class="flex flex-col space-y-4 mb-6">
+        <div class="flex flex-wrap justify-center space-x-2 md:space-x-4 mb-8">
             <button id="show-dashboard-button"
-                class="px-6 py-2 rounded-md font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-colors w-full">
+                class="px-4 py-2 text-sm rounded-md font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-colors my-1">
                 Xem Danh Sách
             </button>
             <button id="show-form-button"
-                class="px-6 py-2 rounded-md font-semibold text-gray-700 bg-gray-200 hover:bg-gray-300 transition-colors w-full">
+                class="px-4 py-2 text-sm rounded-md font-semibold text-gray-700 bg-gray-200 hover:bg-gray-300 transition-colors my-1">
                 Thêm Võ Sinh
             </button>
             <button id="show-exercises-button"
-                class="px-6 py-2 rounded-md font-semibold text-gray-700 bg-gray-200 hover:bg-gray-300 transition-colors w-full">
+                class="px-4 py-2 text-sm rounded-md font-semibold text-gray-700 bg-gray-200 hover:bg-gray-300 transition-colors my-1">
                 Quản Lý Bài Tập
             </button>
         </div>
 
         <div id="dashboard-section" class="space-y-6">
-            <div class="flex flex-col space-y-4">
+            <div class="flex flex-col md:flex-row md:items-center md:space-x-4 space-y-4 md:space-y-0">
                 <input type="text" id="search-input" placeholder="Tìm kiếm võ sinh..."
-                    class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    class="flex-grow w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
             </div>
-            <div class="filter-section-mobile-grid">
-                <div class="w-full">
+            <div class="flex flex-wrap items-center justify-between mt-4 gap-4">
+                <div class="flex-1 min-w-1/2">
                     <label for="filter-club" class="block text-sm font-medium text-gray-700">Võ đường</label>
                     <select id="filter-club" class="filter-select mt-1 w-full">
                         <option value="">Tất cả</option>
                     </select>
                 </div>
-                <div class="w-full">
+                <div class="flex-1 min-w-1/2">
                     <label for="filter-belt" class="block text-sm font-medium text-gray-700">Cấp đai môn phái</label>
                     <select id="filter-belt" class="filter-select mt-1 w-full">
                         <option value="">Tất cả</option>
@@ -230,20 +217,20 @@
                         <option value="Cấp 17 - Chuẩn Võ Sư">Cấp 17 - Chuẩn Võ Sư</option>
                     </select>
                 </div>
-                <div class="w-full">
+                <div class="flex-1 min-w-1/2">
                     <label for="filter-federation-belt" class="block text-sm font-medium text-gray-700">Cấp đai liên
                         đoàn</label>
                     <select id="filter-federation-belt" class="filter-select mt-1 w-full">
                         <option value="">Tất cả</option>
                     </select>
                 </div>
-                <div class="w-full">
+                <div class="flex-1 min-w-1/2">
                     <label for="filter-coach" class="block text-sm font-medium text-gray-700">Huấn luyện viên</label>
                     <select id="filter-coach" class="filter-select mt-1 w-full">
                         <option value="">Tất cả</option>
                     </select>
                 </div>
-                <div class="w-full">
+                <div class="flex-1 min-w-1/2">
                     <label for="filter-status" class="block text-sm font-medium text-gray-700">Trạng thái</label>
                     <select id="filter-status" class="filter-select mt-1 w-full">
                         <option value="">Tất cả</option>
@@ -253,18 +240,18 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 gap-4 mt-4">
-                <div class="w-full">
+            <div class="flex flex-wrap items-center justify-between mt-4 gap-4">
+                <div class="flex-1 min-w-1/2">
                     <label for="filter-age-min" class="block text-sm font-medium text-gray-700">Tuổi tối thiểu</label>
                     <input type="number" id="filter-age-min" placeholder="Tuổi từ" class="filter-select mt-1 w-full"
                         min="0">
                 </div>
-                <div class="w-full">
+                <div class="flex-1 min-w-1/2">
                     <label for="filter-age-max" class="block text-sm font-medium text-gray-700">Tuổi tối đa</label>
                     <input type="number" id="filter-age-max" placeholder="Tuổi đến" class="filter-select mt-1 w-full"
                         min="0">
                 </div>
-                <div class="w-full">
+                <div class="flex-1 min-w-1/2">
                     <label for="filter-gender" class="block text-sm font-medium text-gray-700">Giới tính</label>
                     <select id="filter-gender" class="filter-select mt-1 w-full">
                         <option value="">Tất cả</option>
@@ -272,7 +259,7 @@
                         <option value="Nữ">Nữ</option>
                     </select>
                 </div>
-                <div class="w-full">
+                <div class="flex-1 min-w-1/2">
                     <label class="block text-sm font-medium text-gray-700">Thi thăng đai</label>
                     <div class="flex items-center space-x-4 mt-2">
                         <label class="inline-flex items-center">
@@ -296,13 +283,13 @@
 
         <div id="exercises-section" class="space-y-6 hidden">
             <h2 class="text-2xl font-semibold text-gray-700 mb-4">Danh Sách Bài Tập Môn Phái & Liên Đoàn</h2>
-            <div class="flex flex-col space-y-4 mb-4">
+            <div class="flex items-center justify-between mb-4">
                 <input type="text" id="exercise-search-input" placeholder="Tìm kiếm bài tập..."
-                    class="px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 w-full">
+                    class="px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 w-full md:w-1/3">
             </div>
             <div id="exercise-form-container" class="bg-gray-100 p-4 rounded-lg shadow-inner mb-6">
                 <h3 class="text-lg font-semibold text-gray-700 mb-2">Thêm/Sửa Bài Tập</h3>
-                <form id="exercise-form" class="grid grid-cols-1 gap-4">
+                <form id="exercise-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <input type="hidden" id="exercise-id" name="id">
                     <div>
                         <label for="exercise-name" class="block text-sm font-medium text-gray-700">Tên bài tập</label>
@@ -348,19 +335,21 @@
                         <input type="url" id="exercise-url" name="guide_url" placeholder="https://youtube.com/..."
                             class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
                     </div>
-                    <div class="col-span-1 flex flex-col space-y-2">
+                    <div class="col-span-1 md:col-span-2 flex items-center space-x-4">
                         <button type="submit" id="add-exercise-button"
-                            class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 transition-colors">
+                            class="flex-1 w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 transition-colors">
                             Thêm Bài Tập
                         </button>
                         <button type="button" id="cancel-exercise-button"
-                            class="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-100 transition-colors hidden">
+                            class="flex-1 w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-100 transition-colors hidden">
                             Hủy
                         </button>
                     </div>
                 </form>
             </div>
             <div id="exercise-count" class="text-sm text-gray-600 mt-4 font-semibold"></div>
+            <div id="exercise-form-container" class="bg-gray-100 p-4 rounded-lg shadow-inner mb-6">
+            </div>
             <div id="exercise-list-container">
                 <p class="text-gray-500 text-center">Đang tải danh sách bài tập...</p>
             </div>
@@ -368,18 +357,18 @@
 
         <div id="form-section" class="bg-gray-50 p-6 rounded-lg shadow-inner hidden">
             <h2 id="form-title" class="text-2xl font-semibold text-gray-700 mb-4">Thêm Võ Sinh Mới</h2>
-            <form id="student-form" class="grid grid-cols-1 gap-4">
+            <form id="student-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <input type="hidden" id="student-id" name="id">
 
                 <div>
                     <label for="student-code" class="block text-sm font-medium text-gray-700">Mã Võ Sinh</label>
                     <input type="text" id="student-code" name="studentCode" placeholder="Mã võ sinh"
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm">
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                 </div>
                 <div>
                     <label for="student-name" class="block text-sm font-medium text-gray-700">Họ và Tên</label>
                     <input type="text" id="student-name" name="name" placeholder="Họ và tên"
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                         required>
                 </div>
 
@@ -387,12 +376,12 @@
                     <label for="student-dharma" class="block text-sm font-medium text-gray-700">Pháp Danh (nếu
                         có)</label>
                     <input type="text" id="student-dharma" name="dharmaName" placeholder="Pháp danh"
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm">
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                 </div>
                 <div>
                     <label for="student-gender" class="block text-sm font-medium text-gray-700">Giới tính</label>
                     <select id="student-gender" name="gender"
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm">
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                         <option value="">-- Chọn --</option>
                         <option value="Nam">Nam</option>
                         <option value="Nữ">Nữ</option>
@@ -402,49 +391,49 @@
                 <div>
                     <label for="student-dob" class="block text-sm font-medium text-gray-700">Ngày Sinh</label>
                     <input type="date" id="student-dob" name="dob"
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                         required>
                 </div>
                 <div>
                     <label for="student-idcard" class="block text-sm font-medium text-gray-700">Số Căn Cước Công
                         Dân</label>
                     <input type="text" id="student-idcard" name="idCard" placeholder="Số căn cước"
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm">
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                 </div>
 
                 <div>
                     <label for="student-pob" class="block text-sm font-medium text-gray-700">Nơi Sinh</label>
                     <input type="text" id="student-pob" name="pob" placeholder="Nơi sinh"
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm">
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                 </div>
                 <div>
                     <label for="student-address" class="block text-sm font-medium text-gray-700">Nơi Ở Hiện Tại</label>
                     <input type="text" id="student-address" name="address" placeholder="Nơi ở hiện tại"
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm">
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                 </div>
 
                 <div>
                     <label for="student-phone" class="block text-sm font-medium text-gray-700">Số điện thoại</label>
                     <input type="text" id="student-phone" name="phoneNumber" placeholder="Số điện thoại"
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm">
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                 </div>
                 <div>
                     <label for="student-club" class="block text-sm font-medium text-gray-700">Võ Đường, CLB</label>
                     <input type="text" id="student-club" name="club" placeholder="Võ đường/CLB"
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm">
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                 </div>
 
                 <div>
                     <label for="student-coach" class="block text-sm font-medium text-gray-700">Huấn luyện viên hướng
                         dẫn</label>
                     <input type="text" id="student-coach" name="coach" placeholder="Huấn luyện viên"
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm">
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                 </div>
                 <div>
                     <label for="student-education" class="block text-sm font-medium text-gray-700">Trình độ học
                         vấn</label>
                     <input type="text" id="student-education" name="educationLevel" placeholder="Trình độ học vấn"
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm">
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                 </div>
                 <div class="col-span-1 flex items-center space-x-2">
                     <input type="checkbox" id="promotion-test-uniform" name="promotionTestUniform"
@@ -461,7 +450,7 @@
                 <div>
                     <label for="student-belt" class="block text-sm font-medium text-gray-700">Cấp Đai Môn Phái</label>
                     <select id="student-belt" name="belt"
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm">
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                         <option value="">-- Chọn --</option>
                         <option value="Nâu Đai">Nâu Đai</option>
                         <option value="Cấp 1 - Lam Đai I">Cấp 1 - Lam Đai I</option>
@@ -495,7 +484,7 @@
                     <label for="student-federation-belt" class="block text-sm font-medium text-gray-700">Cấp Đai Liên
                         Đoàn</label>
                     <select id="student-federation-belt" name="federationBelt"
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm">
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                         <option value="">-- Chọn --</option>
                         <option value="Cấp 1">Cấp 1</option>
                         <option value="Cấp 2">Cấp 2</option>
@@ -517,18 +506,18 @@
                         <option value="Cấp 18">Cấp 18</option>
                     </select>
                 </div>
-                <div class="col-span-1">
+                <div class="col-span-1 md:col-span-2">
                     <label for="student-status" class="block text-sm font-medium text-gray-700">Trạng Thái</label>
                     <select id="student-status" name="status"
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm">
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                         <option value="Chưa Nhập Môn">Chưa Nhập Môn</option>
                         <option value="Đã Nhập Môn">Đã Nhập Môn</option>
                     </select>
                 </div>
 
-                <div class="col-span-1">
+                <div class="col-span-1 md:col-span-2">
                     <p class="text-sm font-semibold text-gray-700 mb-2">Tải Ảnh và Văn Bằng</p>
-                    <div class="grid grid-cols-1 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label for="photo-uniform" class="block text-sm font-medium text-gray-700">Ảnh thẻ (Môn
                                 phái)</label>
@@ -586,7 +575,7 @@
                     </div>
                 </div>
 
-                <div class="col-span-1 flex flex-col space-y-2 mt-4">
+                <div class="col-span-1 md:col-span-2 flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-4">
                     <button type="submit" id="submit-button"
                         class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
                         Thêm Võ Sinh
@@ -596,9 +585,13 @@
                         Hủy
                     </button>
                 </div>
-                <div class="col-span-1 mt-8">
+                <div class="col-span-1 md:col-span-2 mt-8">
                     <div id="progress-container-placeholder">
-                        <div class="col-span-1 flex justify-end mt-4">
+                        <div class="col-span-1 md:col-span-2 flex justify-end mt-4 space-x-2">
+                            <button type="button" id="back-to-list-button"
+                                class="px-6 py-2 rounded-md font-semibold text-gray-700 bg-gray-200 hover:bg-gray-300 transition-colors">
+                                Quay Lại Danh Sách
+                            </button>
                             <button type="button" id="save-progress-button"
                                 class="px-6 py-2 rounded-md font-semibold text-white bg-green-600 hover:bg-green-700 transition-colors">
                                 Lưu Tiến Độ
@@ -633,7 +626,27 @@
                 showMessage("Lỗi", `Đã xảy ra lỗi khi lấy thông tin bài tập: ${error.message}`);
             }
         }
+
+        // async function deleteExercise(id) {
+        //     if (!confirm("Bạn có chắc chắn muốn xóa bài tập này?")) return;
+        //     try {
+        //         const data = new FormData();
+        //         data.append('_action', 'delete_exercise');
+        //         data.append('id', id);
+        //         const response = await fetch(API_URL, { method: 'POST', body: data });
+        //         const result = await response.json();
+        //         if (result.success) {
+        //             showMessage("Thành công", "Đã xóa bài tập.");
+        //             fetchExercises(); // Thêm dòng này
+        //         } else {
+        //             showMessage("Lỗi", `Lỗi khi xóa bài tập: ${result.message}`);
+        //         }
+        //     } catch (error) {
+        //         showMessage("Lỗi", `Đã xảy ra lỗi khi xóa bài tập: ${error.message}`);
+        //     }
+        // }
         window.onload = () => {
+            // const API_URL = 'api.php';
             const form = document.getElementById('student-form');
             const studentList = document.getElementById('student-list');
             const formTitle = document.getElementById('form-title');
@@ -650,6 +663,7 @@
             const showFormButton = document.getElementById('show-form-button');
             const showExercisesButton = document.getElementById('show-exercises-button');
 
+            // Filter elements
             const filterClub = document.getElementById('filter-club');
             const filterBelt = document.getElementById('filter-belt');
             const filterFederationBelt = document.getElementById('filter-federation-belt');
@@ -658,10 +672,12 @@
             const filterAgeMin = document.getElementById('filter-age-min');
             const filterAgeMax = document.getElementById('filter-age-max');
 
+            // New filter elements
             const filterGender = document.getElementById('filter-gender');
             const filterPromotionUniform = document.getElementById('filter-promotion-uniform');
             const filterPromotionFederation = document.getElementById('filter-promotion-federation');
 
+            // Modal elements
             const messageModal = document.getElementById('message-modal');
             const modalTitle = document.getElementById('modal-title');
             const modalMessage = document.getElementById('modal-message');
@@ -670,16 +686,58 @@
             const detailsContent = document.getElementById('details-content');
             const detailsCloseButton = document.getElementById('details-close-button');
             const studentCountDisplay = document.getElementById('student-count');
-            const exerciseCountDisplay = document.getElementById('exercise-count');
+            const exerciseCountDisplay = document.getElementById('exercise-count'); // Thêm dòng này
             const exerciseListContainer = document.getElementById('exercise-list-container');
             const exerciseForm = document.getElementById('exercise-form');
             const exerciseIdInput = document.getElementById('exercise-id');
             const addExerciseButton = document.getElementById('add-exercise-button');
             const cancelExerciseButton = document.getElementById('cancel-exercise-button');
             const exerciseSearchInput = document.getElementById('exercise-search-input');
-
+            const backToListButton = document.getElementById('back-to-list-button');
             let allStudents = [];
             let allExercises = [];
+            document.addEventListener('click', async (e) => {
+                if (e.target && e.target.id === 'save-progress-button') {
+                    const studentId = document.getElementById('student-id').value;
+                    const progressCheckboxes = document.querySelectorAll('#edit-exercise-progress-list .progress-checkbox');
+                    let successfulUpdates = 0;
+                    const updates = [];
+
+                    for (const checkbox of progressCheckboxes) {
+                        const exerciseId = checkbox.dataset.exerciseId;
+                        const isCompleted = checkbox.checked;
+
+                        const data = new FormData();
+                        data.append('_action', 'update_progress');
+                        data.append('student_id', studentId);
+                        data.append('exercise_id', exerciseId);
+                        data.append('is_completed', isCompleted ? 1 : 0);
+
+                        updates.push(fetch(API_URL, {
+                            method: 'POST',
+                            body: data
+                        }).then(response => response.json()));
+                    }
+
+                    try {
+                        const results = await Promise.all(updates);
+                        let successfulUpdates = results.filter(r => r.success).length;
+                        showMessage("Thành công", `Đã lưu thành công ${successfulUpdates} bài tập.`);
+                    } catch (error) {
+                        showMessage("Lỗi", `Đã xảy ra lỗi khi cập nhật tiến độ: ${error.message}`);
+                    } finally {
+                        // Tải lại tiến độ sau khi tất cả các yêu cầu đã hoàn tất
+                        fetchStudentProgressForEdit(studentId, document.getElementById('student-belt').value);
+                    }
+                }
+            });
+            ///
+            document.body.addEventListener('click', (e) => {
+                if (e.target.id === 'back-to-list-button') {
+                    fetchStudents();
+                    showSection('dashboard');
+                }
+            });
             document.addEventListener('click', async (e) => {
                 if (e.target && e.target.id === 'save-progress-button') {
                     const studentId = document.getElementById('student-id').value;
@@ -712,10 +770,12 @@
                     } catch (error) {
                         showMessage("Lỗi", `Đã xảy ra lỗi khi cập nhật tiến độ: ${error}`);
                     } finally {
+                        // Tải lại tiến độ để cập nhật "lọ nước"
                         fetchStudentProgressForEdit(studentId, document.getElementById('student-belt').value);
                     }
                 }
             });
+            // Thêm đoạn code này vào cuối phần khai báo biến trong window.onload
             exerciseSearchInput.addEventListener('input', () => {
                 const searchTerm = exerciseSearchInput.value.toLowerCase();
                 const filteredExercises = allExercises.filter(exercise => {
@@ -729,6 +789,18 @@
                 });
                 displayExercises(filteredExercises);
             });
+            // exerciseListContainer.addEventListener('click', (e) => {
+            //     const target = e.target;
+            //     if (target.classList.contains('edit-exercise-btn')) {
+            //         const exerciseId = target.getAttribute('data-id');
+            //         editExercise(exerciseId);
+            //     } else if (target.classList.contains('delete-exercise-btn')) {
+            //         const exerciseId = target.getAttribute('data-id');
+            //         deleteExercise(exerciseId);
+            //     }
+            // });
+
+            // Function to show custom modal message
             function showMessage(title, message) {
                 modalTitle.textContent = title;
                 modalMessage.textContent = message;
@@ -755,6 +827,7 @@
                     deleteExercise(exerciseId);
                 }
             });
+            // --- Image Download Function ---
             function downloadImage(url, filename) {
                 if (!url) {
                     showMessage("Lỗi", "Không có ảnh để tải về.");
@@ -768,6 +841,7 @@
                 document.body.removeChild(link);
             }
 
+            // --- Fetch and Populate Filters ---
             async function fetchFilterOptions() {
                 try {
                     const response = await fetch(`${API_URL}?_action=get_filters`);
@@ -802,6 +876,7 @@
             filterPromotionUniform.addEventListener('change', fetchStudents);
             filterPromotionFederation.addEventListener('change', fetchStudents);
 
+            // Function to calculate age from DOB
             function calculateAge(dob) {
                 if (!dob) return null;
                 const birthDate = new Date(dob);
@@ -813,6 +888,7 @@
                 }
                 return age;
             }
+            // - Xu ly tien do
             async function fetchStudentProgressForEdit(studentId, belt) {
                 const progressList = document.getElementById('edit-exercise-progress-list');
                 const progressText = document.getElementById('edit-progress-text');
@@ -882,6 +958,7 @@
                     console.error("Error fetching progress:", error);
                 }
             }
+            // --- CRUD Operations ---
             async function fetchStudents() {
                 loadingMessage.style.display = 'block';
                 studentList.innerHTML = '';
@@ -912,6 +989,7 @@
                     if (result.success) {
                         let students = result.data.students;
 
+                        // Apply age filtering on the client side
                         if (ageMin !== null || ageMax !== null) {
                             students = students.filter(student => {
                                 const age = calculateAge(student.dob);
@@ -962,8 +1040,8 @@
                         formTitle.textContent = 'Thêm Võ Sinh Mới';
                         submitButton.textContent = 'Thêm Võ Sinh';
                         cancelButton.classList.add('hidden');
-                        fetchStudents();
-                        fetchFilterOptions();
+                        fetchStudents(); // Refresh data
+                        fetchFilterOptions(); // Refresh filter options
                         document.querySelectorAll('img[id^="preview-"]').forEach(img => img.classList.add('hidden'));
                     } else {
                         showMessage("Lỗi", `Đã xảy ra lỗi: ${result.message}`);
@@ -988,8 +1066,8 @@
 
                     if (result.success) {
                         showMessage("Thành công", "Đã xóa võ sinh.");
-                        fetchStudents();
-                        fetchFilterOptions();
+                        fetchStudents(); // Refresh data
+                        fetchFilterOptions(); // Refresh filter options
                     } else {
                         showMessage("Lỗi", `Đã xảy ra lỗi: ${result.message}`);
                     }
@@ -999,7 +1077,11 @@
                 }
             }
 
+            // Function to set up the form for editing
+            // Function to set up the form for editing
+            // Function to set up the form for editing
             function editStudent(student) {
+                // Reset the placeholder content first to avoid duplication
                 document.getElementById('progress-container-placeholder').innerHTML = '';
 
                 document.getElementById('student-code').value = student.student_code || '';
@@ -1016,6 +1098,7 @@
                 document.getElementById('student-coach').value = student.coach || '';
                 document.getElementById('student-education').value = student.education_level || '';
 
+                // Cập nhật trạng thái checkbox từ dữ liệu DB
                 document.getElementById('promotion-test-uniform').checked = student.promotion_test_uniform == 1;
                 document.getElementById('promotion-test-federation').checked = student.promotion_test_federation == 1;
 
@@ -1024,6 +1107,7 @@
                 document.getElementById('student-status').value = student.status || 'Đã Nhập Môn';
                 studentIdInput.value = student.id;
 
+                // Show preview images if URLs exist
                 document.getElementById('preview-photo-uniform').src = student.photo_uniform;
                 document.getElementById('preview-photo-uniform').classList.toggle('hidden', !student.photo_uniform);
                 document.getElementById('preview-photo-federation').src = student.photo_federation;
@@ -1057,21 +1141,28 @@
                 </div>
             </div>
         </div>
-        <div class="col-span-1 flex justify-end mt-4">
-            <button type="button" id="save-progress-button" class="px-6 py-2 rounded-md font-semibold text-white bg-green-600 hover:bg-green-700 transition-colors">
-                Lưu Tiến Độ
-            </button>
-        </div>
+        <div class="col-span-1 md:col-span-2 flex justify-end mt-4 space-x-2">
+                            <button type="button" id="back-to-list-button"
+                                class="px-6 py-2 rounded-md font-semibold text-gray-700 bg-gray-200 hover:bg-gray-300 transition-colors">
+                                Quay Lại Danh Sách
+                            </button>
+                            <button type="button" id="save-progress-button"
+                                class="px-6 py-2 rounded-md font-semibold text-white bg-green-600 hover:bg-green-700 transition-colors">
+                                Lưu Tiến Độ
+                            </button>
+                        </div>
     `;
 
                 showSection('form');
 
+                // Tải tiến độ sau khi form đã được hiển thị
                 if (student.belt) {
                     fetchStudentProgressForEdit(student.id, student.belt);
                 }
                 document.getElementById('save-progress-button').classList.remove('hidden');
             }
 
+            // Handle cancel button
             cancelButton.addEventListener('click', () => {
                 form.reset();
                 studentIdInput.value = '';
@@ -1079,14 +1170,17 @@
                 submitButton.textContent = 'Thêm Võ Sinh';
                 cancelButton.classList.add('hidden');
                 document.querySelectorAll('img[id^="preview-"]').forEach(img => img.classList.add('hidden'));
-                document.getElementById('progress-container-placeholder').innerHTML = '';
                 showSection('dashboard');
             });
-
+            backToListButton.addEventListener('click', () => {
+                fetchStudents(); // Làm mới danh sách võ sinh
+                showSection('dashboard'); // Chuyển về màn hình danh sách
+            });
+            // Show student details in modal
             function showStudentDetails(student) {
                 detailsContent.innerHTML = `
                     <h3 class="text-2xl font-bold text-gray-900 mb-4">${student.name}</h3>
-                    <div class="grid grid-cols-1 gap-y-4 text-gray-700">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-4 gap-x-8 text-gray-700">
                         <div><span class="font-semibold">Mã Võ Sinh:</span> ${student.student_code || 'N/A'}</div>
                         <div><span class="font-semibold">Pháp Danh:</span> ${student.dharma_name || 'N/A'}</div>
                         <div><span class="font-semibold">Giới tính:</span> ${student.gender || 'N/A'}</div>
@@ -1106,62 +1200,61 @@
                     </div>
                     <div class="mt-8">
                         <h4 class="text-xl font-bold text-gray-900 mb-4">Tiến Độ Thi Thăng Đai (${student.belt || 'N/A'})</h4>
-                        <div class="flex flex-col items-center space-y-4">
-                            <div class="progress-container">
-                                <div id="progress-fill" class="progress-fill"></div>
+                        <div class="flex items-center space-x-6">
+                            <div class="flex flex-col items-center">
+                                <div class="progress-container">
+                                    <div id="progress-fill" class="progress-fill"></div>
+                                </div>
+                                <span id="progress-text" class="mt-2 text-lg font-bold text-gray-700">0%</span>
                             </div>
-                            <span id="progress-text" class="mt-2 text-lg font-bold text-gray-700">0%</span>
-                            <div class="w-full">
+                            <div class="flex-grow">
                                 <p class="text-sm text-gray-500 mb-2" id="progress-info">Đang tải tiến độ...</p>
                                 <div id="exercise-progress-list" class="space-y-2">
                                     </div>
                             </div>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 gap-4 mt-6 text-center">
+                    <div class="grid grid-cols-2 gap-4 mt-6 text-center">
                         <div>
                             <p class="text-sm font-medium text-gray-500 mb-2">Ảnh Thẻ Môn Phái</p>
                             <img src="${student.photo_uniform || 'https://placehold.co/150x200/e5e7eb/4b5563?text=N/A'}" alt="Ảnh thẻ môn phái" class="w-full h-auto object-cover rounded-md shadow-sm" onerror="this.onerror=null;this.src='https://placehold.co/150x200/e5e7eb/4b5563?text=N/A'">
-                            <button onclick="downloadImage('${student.photo_uniform}', '${student.student_code || 'N/A'}_anh_the_mon_phai.png')" class="mt-2 px-4 py-2 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 transition-colors w-full">Tải ảnh về</button>
+                            <button onclick="downloadImage('${student.photo_uniform}', '${student.student_code || 'N/A'}_anh_the_mon_phai.png')" class="mt-2 px-4 py-2 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 transition-colors">Tải ảnh về</button>
                         </div>
                         <div>
                             <p class="text-sm font-medium text-gray-500 mb-2">Ảnh Thẻ Liên Đoàn</p>
                             <img src="${student.photo_federation || 'https://placehold.co/150x200/e5e7eb/4b5563?text=N/A'}" alt="Ảnh thẻ liên đoàn" class="w-full h-auto object-cover rounded-md shadow-sm" onerror="this.onerror=null;this.src='https://placehold.co/150x200/e5e7eb/4b5563?text=N/A'">
-                            <button onclick="downloadImage('${student.photo_federation}', '${student.student_code || 'N/A'}_anh_the_lien_doan.png')" class="mt-2 px-4 py-2 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 transition-colors w-full">Tải ảnh về</button>
+                            <button onclick="downloadImage('${student.photo_federation}', '${student.student_code || 'N/A'}_anh_the_lien_doan.png')" class="mt-2 px-4 py-2 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 transition-colors">Tải ảnh về</button>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 gap-4 mt-4 text-center">
+                    <div class="grid grid-cols-2 gap-4 mt-4 text-center">
                         <div>
                             <p class="text-sm font-medium text-gray-500 mb-2">Văn Bằng Cũ Môn Phái</p>
                             <img src="${student.diploma_uniform || 'https://placehold.co/200x150/e5e7eb/4b5563?text=N/A'}" alt="Văn bằng môn phái" class="w-full h-auto object-cover rounded-md shadow-sm" onerror="this.onerror=null;this.src='https://placehold.co/200x150/e5e7eb/4b5563?text=N/A'">
-                            <button onclick="downloadImage('${student.diploma_uniform}', '${student.student_code || 'N/A'}_van_bang_mon_phai.png')" class="mt-2 px-4 py-2 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 transition-colors w-full">Tải ảnh về</button>
+                            <button onclick="downloadImage('${student.diploma_uniform}', '${student.student_code || 'N/A'}_van_bang_mon_phai.png')" class="mt-2 px-4 py-2 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 transition-colors">Tải ảnh về</button>
                         </div>
                         <div>
                             <p class="text-sm font-medium text-gray-500 mb-2">Văn Bằng Cũ Liên Đoàn</p>
                             <img src="${student.diploma_federation || 'https://placehold.co/200x150/e5e7eb/4b5563?text=N/A'}" alt="Văn bằng liên đoàn" class="w-full h-auto object-cover rounded-md shadow-sm" onerror="this.onerror=null;this.src='https://placehold.co/200x150/e5e7eb/4b5563?text=N/A'">
-                            <button onclick="downloadImage('${student.diploma_federation}', '${student.student_code || 'N/A'}_van_bang_lien_doan.png')" class="mt-2 px-4 py-2 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 transition-colors w-full">Tải ảnh về</button>
+                            <button onclick="downloadImage('${student.diploma_federation}', '${student.student_code || 'N/A'}_van_bang_lien_doan.png')" class="mt-2 px-4 py-2 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 transition-colors">Tải ảnh về</button>
                         </div>
                         <div>
                             <p class="text-sm font-medium text-gray-500 mb-2">Phiếu điểm Môn Phái</p>
                             <img src="${student.scorecard_uniform || 'https://placehold.co/200x150/e5e7eb/4b5563?text=N/A'}" alt="Phiếu điểm môn phái" class="w-full h-auto object-cover rounded-md shadow-sm" onerror="this.onerror=null;this.src='https://placehold.co/200x150/e5e7eb/4b5563?text=N/A'">
-                            <button onclick="downloadImage('${student.scorecard_uniform}', '${student.student_code || 'N/A'}_phieu_diem_mon_phai.png')" class="mt-2 px-4 py-2 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 transition-colors w-full">Tải ảnh về</button>
+                            <button onclick="downloadImage('${student.scorecard_uniform}', '${student.student_code || 'N/A'}_phieu_diem_mon_phai.png')" class="mt-2 px-4 py-2 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 transition-colors">Tải ảnh về</button>
                         </div>
                         <div>
                             <p class="text-sm font-medium text-gray-500 mb-2">Phiếu điểm Liên Đoàn</p>
                             <img src="${student.scorecard_federation || 'https://placehold.co/200x150/e5e7eb/4b5563?text=N/A'}" alt="Phiếu điểm liên đoàn" class="w-full h-auto object-cover rounded-md shadow-sm" onerror="this.onerror=null;this.src='https://placehold.co/200x150/e5e7eb/4b5563?text=N/A'">
-                            <button onclick="downloadImage('${student.scorecard_federation}', '${student.student_code || 'N/A'}_phieu_diem_lien_doan.png')" class="mt-2 px-4 py-2 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 transition-colors w-full">Tải ảnh về</button>
+                            <button onclick="downloadImage('${student.scorecard_federation}', '${student.student_code || 'N/A'}_phieu_diem_lien_doan.png')" class="mt-2 px-4 py-2 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 transition-colors">Tải ảnh về</button>
                         </div>
                     </div>
                 `;
                 detailsModal.classList.remove('hidden');
                 detailsModal.classList.add('flex');
-
-                if (student.belt) {
-                    fetchStudentProgress(student.id, student.belt);
-                }
             }
 
+            // Show/Hide Sections
             function showSection(section) {
                 dashboardSection.classList.add('hidden');
                 formSection.classList.add('hidden');
@@ -1190,7 +1283,7 @@
             }
 
             showDashboardButton.addEventListener('click', () => {
-                fetchStudents();
+                fetchStudents(); // Fetch data when navigating to dashboard
                 showSection('dashboard');
             });
             showFormButton.addEventListener('click', () => {
@@ -1201,6 +1294,7 @@
                 cancelButton.classList.add('hidden');
                 document.querySelectorAll('img[id^="preview-"]').forEach(img => img.classList.add('hidden'));
 
+                // Tự động sinh mã võ sinh và điền vào trường khi thêm mới
                 document.getElementById('student-code').value = generateUniqueCode();
                 document.getElementById('student-code').readOnly = true;
                 document.getElementById('progress-container-placeholder').innerHTML = '';
@@ -1212,6 +1306,7 @@
                 showSection('exercises');
             });
 
+            // --- CRUD for Exercises ---
             exerciseForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const exerciseId = exerciseIdInput.value;
@@ -1234,7 +1329,7 @@
                         exerciseIdInput.value = '';
                         addExerciseButton.textContent = 'Thêm Bài Tập';
                         cancelExerciseButton.classList.add('hidden');
-                        fetchExercises();
+                        fetchExercises(); // Thêm dòng này
                     } else {
                         showMessage("Lỗi", `Đã xảy ra lỗi: ${result.message}`);
                     }
@@ -1256,17 +1351,17 @@
                     const response = await fetch(`${API_URL}?_action=get_all_exercises`);
                     const result = await response.json();
                     if (result.success) {
-                        allExercises = result.data;
-                        displayExercises(allExercises);
-                        exerciseCountDisplay.textContent = `Tổng số bài tập: ${allExercises.length}`;
+                        allExercises = result.data; // Lưu toàn bộ dữ liệu vào biến
+                        displayExercises(allExercises); // Hiển thị toàn bộ dữ liệu lần đầu
+                        exerciseCountDisplay.textContent = `Tổng số bài tập: ${allExercises.length}`; // Thêm dòng này
                     } else {
                         exerciseListContainer.innerHTML = `<p class="text-gray-500 text-center">Lỗi: ${result.message}</p>`;
-                        exerciseCountDisplay.textContent = `Tổng số bài tập: 0`;
+                        exerciseCountDisplay.textContent = `Tổng số bài tập: 0`; // Thêm dòng này khi có lỗi
                     }
                 } catch (error) {
                     console.error("Error fetching exercises:", error);
                     exerciseListContainer.innerHTML = `<p class="text-gray-500 text-center">Lỗi khi tải dữ liệu bài tập.</p>`;
-                    exerciseCountDisplay.textContent = `Tổng số bài tập: 0`;
+                    exerciseCountDisplay.textContent = `Tổng số bài tập: 0`; // Thêm dòng này khi có lỗi
                 }
             }
 
@@ -1277,55 +1372,74 @@
                     return;
                 }
 
-                const cardsHtml = exercises.map((exercise, index) => `
-                    <div class="exercise-card">
-                        <p class="text-xs text-gray-400">#${index + 1}</p>
-                        <h4 class="font-semibold text-lg text-gray-900">${exercise.name}</h4>
-                        <p class="text-sm text-gray-600"><strong>Cấp Đai:</strong> ${exercise.belt}</p>
-                        <p class="text-sm text-gray-600"><strong>Loại:</strong> ${exercise.type === 'uniform' ? 'Môn Phái' : 'Liên đoàn'}</p>
-                        <p class="text-sm text-gray-600"><strong>Hướng dẫn:</strong> ${exercise.guide_url ? `<a href="${exercise.guide_url}" target="_blank" class="text-blue-600 hover:text-blue-900">Xem</a>` : 'N/A'}</p>
-                        <div class="flex space-x-2 mt-2">
-                            <button class="edit-exercise-btn text-yellow-600 hover:text-yellow-900 font-medium" data-id="${exercise.id}">Sửa</button>
-                            <button class="delete-exercise-btn text-red-600 hover:text-red-900 font-medium" data-id="${exercise.id}">Xóa</button>
-                        </div>
-                    </div>
-                `).join('');
+                // Hàm để cập nhật tiến độ lên server
+                async function updateProgress(e) {
+                    const checkbox = e.target;
+                    const studentId = checkbox.dataset.studentId;
+                    const exerciseId = checkbox.dataset.exerciseId;
+                    const isCompleted = checkbox.checked;
 
-                exerciseListContainer.innerHTML = `<div class="space-y-4">${cardsHtml}</div>`;
-            }
+                    const data = new FormData();
+                    data.append('_action', 'update_progress');
+                    data.append('student_id', studentId);
+                    data.append('exercise_id', exerciseId);
+                    data.append('is_completed', isCompleted ? 1 : 0);
 
-            async function updateProgress(e) {
-                const checkbox = e.target;
-                const studentId = checkbox.dataset.studentId;
-                const exerciseId = checkbox.dataset.exerciseId;
-                const isCompleted = checkbox.checked;
+                    try {
+                        const response = await fetch(API_URL, {
+                            method: 'POST',
+                            body: data
+                        });
+                        const result = await response.json();
 
-                const data = new FormData();
-                data.append('_action', 'update_progress');
-                data.append('student_id', studentId);
-                data.append('exercise_id', exerciseId);
-                data.append('is_completed', isCompleted ? 1 : 0);
-
-                try {
-                    const response = await fetch(API_URL, {
-                        method: 'POST',
-                        body: data
-                    });
-                    const result = await response.json();
-
-                    if (result.success) {
-                        const currentStudent = allStudents.find(s => s.id == studentId);
-                        if (currentStudent) {
-                            fetchStudentProgress(currentStudent.id, currentStudent.belt);
+                        if (result.success) {
+                            const currentStudent = allStudents.find(s => s.id == studentId);
+                            if (currentStudent) {
+                                fetchStudentProgress(currentStudent.id, currentStudent.belt);
+                            }
+                        } else {
+                            showMessage("Lỗi", `Cập nhật tiến độ thất bại: ${result.message}`);
+                            checkbox.checked = !isCompleted; // Revert checkbox state
                         }
-                    } else {
-                        showMessage("Lỗi", `Cập nhật tiến độ thất bại: ${result.message}`);
-                        checkbox.checked = !isCompleted;
+                    } catch (error) {
+                        showMessage("Lỗi", `Đã xảy ra lỗi khi gửi yêu cầu: ${error.message}`);
+                        checkbox.checked = !isCompleted; // Revert checkbox state
                     }
-                } catch (error) {
-                    showMessage("Lỗi", `Đã xảy ra lỗi khi gửi yêu cầu: ${error.message}`);
-                    checkbox.checked = !isCompleted;
                 }
+                const tableHtml = `
+        <div class="overflow-x-auto bg-white rounded-lg shadow">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">STT</th> 
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên Bài Tập</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cấp Đai</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Loại</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">URL Hướng dẫn</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    ${exercises.map((exercise, index) => `
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${index + 1}</td> 
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${exercise.name}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${exercise.belt}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${exercise.type === 'uniform' ? 'Môn Phái' : 'Liên đoàn'}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                ${exercise.guide_url ? `<a href="${exercise.guide_url}" target="_blank" class="text-blue-600 hover:text-blue-900">Xem</a>` : 'N/A'}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium flex space-x-2">
+                                <button class="edit-exercise-btn text-yellow-600 hover:text-yellow-900" data-id="${exercise.id}">Sửa</button>
+                                <button class="delete-exercise-btn text-red-600 hover:text-red-900" data-id="${exercise.id}">Xóa</button>
+                            </td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        </div>
+    `;
+                exerciseListContainer.innerHTML = tableHtml;
             }
             async function fetchStudentProgressForEdit(studentId, belt) {
                 const progressList = document.getElementById('edit-exercise-progress-list');
@@ -1464,6 +1578,389 @@
             }
 
 
+            // --- CRUD for Students ---
+            searchInput.addEventListener('input', () => {
+                const searchTerm = searchInput.value.toLowerCase();
+                const filteredStudents = allStudents.filter(student => {
+                    const name = (student.name || '').toLowerCase();
+                    const code = (student.student_code || '').toLowerCase();
+                    const idCard = (student.id_card || '').toLowerCase();
+                    const pob = (student.pob || '').toLowerCase();
+                    const address = (student.address || '').toLowerCase();
+                    const phoneNumber = (student.phone_number || '').toLowerCase();
+                    const coach = (student.coach || '').toLowerCase();
+                    const education = (student.education_level || '').toLowerCase();
+
+                    return name.includes(searchTerm) ||
+                        code.includes(searchTerm) ||
+                        idCard.includes(searchTerm) ||
+                        pob.includes(searchTerm) ||
+                        address.includes(searchTerm) ||
+                        phoneNumber.includes(searchTerm) ||
+                        coach.includes(searchTerm) ||
+                        education.includes(searchTerm);
+                });
+                displayStudents(filteredStudents);
+            });
+            async function deleteStudent(id) {
+                if (!confirm("Bạn có chắc chắn muốn xóa võ sinh này?")) return;
+                try {
+                    const data = new FormData();
+                    data.append('_action', 'delete');
+                    data.append('id', id);
+
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        body: data
+                    });
+                    const result = await response.json();
+
+                    if (result.success) {
+                        showMessage("Thành công", "Đã xóa võ sinh.");
+                        fetchStudents(); // Refresh data
+                        fetchFilterOptions(); // Refresh filter options
+                    } else {
+                        showMessage("Lỗi", `Đã xảy ra lỗi: ${result.message}`);
+                    }
+                } catch (error) {
+                    showMessage("Lỗi", `Đã xảy ra lỗi khi xóa võ sinh: ${error.message}`);
+                    console.error("Error deleting student:", error);
+                }
+            }
+
+            // Function to set up the form for editing
+            // Function to set up the form for editing
+            // Function to set up the form for editing
+            function editStudent(student) {
+                // Reset the placeholder content first to avoid duplication
+                document.getElementById('progress-container-placeholder').innerHTML = '';
+
+                document.getElementById('student-code').value = student.student_code || '';
+                document.getElementById('student-code').readOnly = true;
+                document.getElementById('student-name').value = student.name;
+                document.getElementById('student-dharma').value = student.dharma_name || '';
+                document.getElementById('student-gender').value = student.gender || '';
+                document.getElementById('student-dob').value = student.dob;
+                document.getElementById('student-idcard').value = student.id_card || '';
+                document.getElementById('student-pob').value = student.pob || '';
+                document.getElementById('student-address').value = student.address || '';
+                document.getElementById('student-phone').value = student.phone_number || '';
+                document.getElementById('student-club').value = student.club || '';
+                document.getElementById('student-coach').value = student.coach || '';
+                document.getElementById('student-education').value = student.education_level || '';
+
+                // Cập nhật trạng thái checkbox từ dữ liệu DB
+                document.getElementById('promotion-test-uniform').checked = student.promotion_test_uniform == 1;
+                document.getElementById('promotion-test-federation').checked = student.promotion_test_federation == 1;
+
+                document.getElementById('student-belt').value = student.belt || '';
+                document.getElementById('student-federation-belt').value = student.federation_belt || '';
+                document.getElementById('student-status').value = student.status || 'Đã Nhập Môn';
+                studentIdInput.value = student.id;
+
+                // Show preview images if URLs exist
+                document.getElementById('preview-photo-uniform').src = student.photo_uniform;
+                document.getElementById('preview-photo-uniform').classList.toggle('hidden', !student.photo_uniform);
+                document.getElementById('preview-photo-federation').src = student.photo_federation;
+                document.getElementById('preview-photo-federation').classList.toggle('hidden', !student.photo_federation);
+                document.getElementById('preview-diploma-uniform').src = student.diploma_uniform;
+                document.getElementById('preview-diploma-uniform').classList.toggle('hidden', !student.diploma_uniform);
+                document.getElementById('preview-diploma-federation').src = student.diploma_federation;
+                document.getElementById('preview-diploma-federation').classList.toggle('hidden', !student.diploma_federation);
+                document.getElementById('preview-scorecard-uniform').src = student.scorecard_uniform;
+                document.getElementById('preview-scorecard-uniform').classList.toggle('hidden', !student.scorecard_uniform);
+                document.getElementById('preview-scorecard-federation').src = student.scorecard_federation;
+                document.getElementById('preview-scorecard-federation').classList.toggle('hidden', !student.scorecard_federation);
+
+                formTitle.textContent = 'Sửa Thông Tin Võ Sinh';
+                submitButton.textContent = 'Lưu Thay Đổi';
+                cancelButton.classList.remove('hidden');
+
+                const progressPlaceholder = document.getElementById('progress-container-placeholder');
+                progressPlaceholder.innerHTML = `
+        <h4 class="text-xl font-bold text-gray-900 mb-4">Tiến Độ Thi Thăng Đai (${student.belt || 'N/A'})</h4>
+        <div class="flex items-center space-x-6">
+            <div class="flex flex-col items-center">
+                <div class="progress-container">
+                    <div id="edit-progress-fill" class="progress-fill"></div>
+                </div>
+                <span id="edit-progress-text" class="mt-2 text-lg font-bold text-gray-700">0%</span>
+            </div>
+            <div class="flex-grow">
+                <p class="text-sm text-gray-500 mb-2" id="edit-progress-info">Đang tải tiến độ...</p>
+                <div id="edit-exercise-progress-list" class="space-y-2">
+                    </div>
+            </div>
+        </div>
+        <div class="col-span-1 md:col-span-2 flex justify-end mt-4 space-x-2">
+                            <button type="button" id="back-to-list-button"
+                                class="px-6 py-2 rounded-md font-semibold text-gray-700 bg-gray-200 hover:bg-gray-300 transition-colors">
+                                Quay Lại Danh Sách
+                            </button>
+                            <button type="button" id="save-progress-button"
+                                class="px-6 py-2 rounded-md font-semibold text-white bg-green-600 hover:bg-green-700 transition-colors">
+                                Lưu Tiến Độ
+                            </button>
+                        </div>
+    `;
+
+                showSection('form');
+
+                // Tải tiến độ sau khi form đã được hiển thị
+                if (student.belt) {
+                    fetchStudentProgressForEdit(student.id, student.belt);
+                }
+            }
+
+            // Handle cancel button
+            cancelButton.addEventListener('click', () => {
+                form.reset();
+                studentIdInput.value = '';
+                formTitle.textContent = 'Thêm Võ Sinh Mới';
+                submitButton.textContent = 'Thêm Võ Sinh';
+                cancelButton.classList.add('hidden');
+                document.querySelectorAll('img[id^="preview-"]').forEach(img => img.classList.add('hidden'));
+                document.getElementById('progress-container-placeholder').innerHTML = '';
+                showSection('dashboard');
+            });
+
+            // Show student details in modal
+            function showStudentDetails(student) {
+                detailsContent.innerHTML = `
+        <h3 class="text-2xl font-bold text-gray-900 mb-4">${student.name}</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-4 gap-x-8 text-gray-700">
+            <div><span class="font-semibold">Mã Võ Sinh:</span> ${student.student_code || 'N/A'}</div>
+            <div><span class="font-semibold">Pháp Danh:</span> ${student.dharma_name || 'N/A'}</div>
+            <div><span class="font-semibold">Giới tính:</span> ${student.gender || 'N/A'}</div>
+            <div><span class="font-semibold">Ngày Sinh:</span> ${student.dob ? new Date(student.dob).toLocaleDateString('vi-VN') : 'N/A'}</div>
+            <div><span class="font-semibold">CCCD:</span> ${student.id_card || 'N/A'}</div>
+            <div><span class="font-semibold">Nơi Sinh:</span> ${student.pob || 'N/A'}</div>
+            <div><span class="font-semibold">Nơi Ở:</span> ${student.address || 'N/A'}</div>
+            <div><span class="font-semibold">Số điện thoại:</span> ${student.phone_number || 'N/A'}</div>
+            <div><span class="font-semibold">Võ đường:</span> ${student.club || 'N/A'}</div>
+            <div><span class="font-semibold">Huấn luyện viên:</span> ${student.coach || 'N/A'}</div>
+            <div><span class="font-semibold">Trình độ học vấn:</span> ${student.education_level || 'N/A'}</div>
+            <div><span class="font-semibold">Cấp Đai Môn Phái:</span> ${student.belt || 'N/A'}</div>
+            <div><span class="font-semibold">Cấp Đai Liên Đoàn:</span> ${student.federation_belt || 'N/A'}</div>
+            <div><span class="font-semibold">Trạng Thái:</span> ${student.status || 'N/A'}</div>
+            <div><span class="font-semibold">Đăng ký thi Môn phái:</span> ${student.promotion_test_uniform == 1 ? 'Đã đăng ký' : 'Chưa đăng ký'}</div>
+            <div><span class="font-semibold">Đăng ký thi Liên đoàn:</span> ${student.promotion_test_federation == 1 ? 'Đã đăng ký' : 'Chưa đăng ký'}</div>
+        </div>
+
+        <div class="mt-8">
+            <h4 class="text-xl font-bold text-gray-900 mb-4">Tiến Độ Thi Thăng Đai (${student.belt || 'N/A'})</h4>
+            <div class="flex items-center space-x-6">
+                <div class="flex flex-col items-center">
+                    <div class="progress-container">
+                        <div id="progress-fill" class="progress-fill"></div>
+                    </div>
+                    <span id="progress-text" class="mt-2 text-lg font-bold text-gray-700">0%</span>
+                </div>
+                <div class="flex-grow">
+                    <p class="text-sm text-gray-500 mb-2" id="progress-info">Đang tải tiến độ...</p>
+                    <div id="exercise-progress-list" class="space-y-2">
+                        </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 mt-6 text-center">
+            <div>
+                <p class="text-sm font-medium text-gray-500 mb-2">Ảnh Thẻ Môn Phái</p>
+                <img src="${student.photo_uniform || 'https://placehold.co/150x200/e5e7eb/4b5563?text=N/A'}" alt="Ảnh thẻ môn phái" class="w-full h-auto object-cover rounded-md shadow-sm" onerror="this.onerror=null;this.src='https://placehold.co/150x200/e5e7eb/4b5563?text=N/A'">
+                <button onclick="downloadImage('${student.photo_uniform}', '${student.student_code || 'N/A'}_anh_the_mon_phai.png')" class="mt-2 px-4 py-2 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 transition-colors">Tải ảnh về</button>
+            </div>
+            <div>
+                <p class="text-sm font-medium text-gray-500 mb-2">Ảnh Thẻ Liên Đoàn</p>
+                <img src="${student.photo_federation || 'https://placehold.co/150x200/e5e7eb/4b5563?text=N/A'}" alt="Ảnh thẻ liên đoàn" class="w-full h-auto object-cover rounded-md shadow-sm" onerror="this.onerror=null;this.src='https://placehold.co/150x200/e5e7eb/4b5563?text=N/A'">
+                <button onclick="downloadImage('${student.photo_federation}', '${student.student_code || 'N/A'}_anh_the_lien_doan.png')" class="mt-2 px-4 py-2 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 transition-colors">Tải ảnh về</button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 mt-4 text-center">
+            <div>
+                <p class="text-sm font-medium text-gray-500 mb-2">Văn Bằng Cũ Môn Phái</p>
+                <img src="${student.diploma_uniform || 'https://placehold.co/200x150/e5e7eb/4b5563?text=N/A'}" alt="Văn bằng môn phái" class="w-full h-auto object-cover rounded-md shadow-sm" onerror="this.onerror=null;this.src='https://placehold.co/200x150/e5e7eb/4b5563?text=N/A'">
+                <button onclick="downloadImage('${student.diploma_uniform}', '${student.student_code || 'N/A'}_van_bang_mon_phai.png')" class="mt-2 px-4 py-2 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 transition-colors">Tải ảnh về</button>
+            </div>
+            <div>
+                <p class="text-sm font-medium text-gray-500 mb-2">Văn Bằng Cũ Liên Đoàn</p>
+                <img src="${student.diploma_federation || 'https://placehold.co/200x150/e5e7eb/4b5563?text=N/A'}" alt="Văn bằng liên đoàn" class="w-full h-auto object-cover rounded-md shadow-sm" onerror="this.onerror=null;this.src='https://placehold.co/200x150/e5e7eb/4b5563?text=N/A'">
+                <button onclick="downloadImage('${student.diploma_federation}', '${student.student_code || 'N/A'}_van_bang_lien_doan.png')" class="mt-2 px-4 py-2 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 transition-colors">Tải ảnh về</button>
+            </div>
+            <div>
+                <p class="text-sm font-medium text-gray-500 mb-2">Phiếu điểm Môn Phái</p>
+                <img src="${student.scorecard_uniform || 'https://placehold.co/200x150/e5e7eb/4b5563?text=N/A'}" alt="Phiếu điểm môn phái" class="w-full h-auto object-cover rounded-md shadow-sm" onerror="this.onerror=null;this.src='https://placehold.co/200x150/e5e7eb/4b5563?text=N/A'">
+                <button onclick="downloadImage('${student.scorecard_uniform}', '${student.student_code || 'N/A'}_phieu_diem_mon_phai.png')" class="mt-2 px-4 py-2 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 transition-colors">Tải ảnh về</button>
+            </div>
+            <div>
+                <p class="text-sm font-medium text-gray-500 mb-2">Phiếu điểm Liên Đoàn</p>
+                <img src="${student.scorecard_federation || 'https://placehold.co/200x150/e5e7eb/4b5563?text=N/A'}" alt="Phiếu điểm liên đoàn" class="w-full h-auto object-cover rounded-md shadow-sm" onerror="this.onerror=null;this.src='https://placehold.co/200x150/e5e7eb/4b5563?text=N/A'">
+                <button onclick="downloadImage('${student.scorecard_federation}', '${student.student_code || 'N/A'}_phieu_diem_lien_doan.png')" class="mt-2 px-4 py-2 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 transition-colors">Tải ảnh về</button>
+            </div>
+        </div>
+    `;
+                detailsModal.classList.remove('hidden');
+                detailsModal.classList.add('flex');
+
+                // Thêm lời gọi hàm fetchStudentProgress để hiển thị tiến độ bài tập
+                if (student.belt) {
+                    fetchStudentProgress(student.id, student.belt);
+                }
+            }
+            // Show/Hide Sections
+            function showSection(section) {
+                dashboardSection.classList.add('hidden');
+                formSection.classList.add('hidden');
+                exercisesSection.classList.add('hidden');
+
+                showDashboardButton.classList.remove('bg-blue-600', 'text-white');
+                showDashboardButton.classList.add('bg-gray-200', 'text-gray-700');
+                showFormButton.classList.remove('bg-blue-600', 'text-white');
+                showFormButton.classList.add('bg-gray-200', 'text-gray-700');
+                showExercisesButton.classList.remove('bg-blue-600', 'text-white');
+                showExercisesButton.classList.add('bg-gray-200', 'text-gray-700');
+
+                if (section === 'dashboard') {
+                    dashboardSection.classList.remove('hidden');
+                    showDashboardButton.classList.add('bg-blue-600', 'text-white');
+                    showDashboardButton.classList.remove('bg-gray-200', 'text-gray-700');
+                } else if (section === 'form') {
+                    formSection.classList.remove('hidden');
+                    showFormButton.classList.add('bg-blue-600', 'text-white');
+                    showFormButton.classList.remove('bg-gray-200', 'text-gray-700');
+                } else if (section === 'exercises') {
+                    exercisesSection.classList.remove('hidden');
+                    showExercisesButton.classList.add('bg-blue-600', 'text-white');
+                    showExercisesButton.classList.remove('bg-gray-200', 'text-gray-700');
+                }
+            }
+
+            showDashboardButton.addEventListener('click', () => {
+                fetchStudents(); // Fetch data when navigating to dashboard
+                showSection('dashboard');
+            });
+            showFormButton.addEventListener('click', () => {
+                form.reset();
+                studentIdInput.value = '';
+                formTitle.textContent = 'Thêm Võ Sinh Mới';
+                submitButton.textContent = 'Thêm Võ Sinh';
+                cancelButton.classList.add('hidden');
+                document.querySelectorAll('img[id^="preview-"]').forEach(img => img.classList.add('hidden'));
+
+                // Tự động sinh mã võ sinh và điền vào trường khi thêm mới
+                document.getElementById('student-code').value = generateUniqueCode();
+                document.getElementById('student-code').readOnly = true;
+
+                showSection('form');
+            });
+
+            showExercisesButton.addEventListener('click', () => {
+                fetchExercises();
+                showSection('exercises');
+            });
+
+            // async function fetchExercises() {
+            //     exerciseListContainer.innerHTML = '<p class="text-gray-500 text-center">Đang tải danh sách bài tập...</p>';
+            //     try {
+            //         const response = await fetch(`${API_URL}?_action=get_all_exercises`);
+            //         const result = await response.json();
+            //         if (result.success) {
+            //             displayExercises(result.data);
+            //         } else {
+            //             exerciseListContainer.innerHTML = `<p class="text-gray-500 text-center">Lỗi: ${result.message}</p>`;
+            //         }
+            //     } catch (error) {
+            //         console.error("Error fetching exercises:", error);
+            //         exerciseListContainer.innerHTML = `<p class="text-gray-500 text-center">Lỗi khi tải dữ liệu bài tập.</p>`;
+            //     }
+            // }
+
+            // function displayExercises(exercises) {
+            //     exerciseListContainer.innerHTML = '';
+            //     if (exercises.length === 0) {
+            //         exerciseListContainer.innerHTML = '<p class="text-gray-500 text-center">Chưa có bài tập nào được thêm.</p>';
+            //         return;
+            //     }
+
+            //     const tableHtml = `
+            //         <div class="overflow-x-auto bg-white rounded-lg shadow">
+            //             <table class="min-w-full divide-y divide-gray-200">
+            //                 <thead class="bg-gray-50">
+            //                     <tr>
+            //                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">STT</th> 
+            //                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên Bài Tập</th>
+            //                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cấp Đai</th>
+            //                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Loại</th>
+            //                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">URL Hướng dẫn</th>
+            //                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hành động</th>
+            //                     </tr>
+            //                 </thead>
+            //                 <tbody class="bg-white divide-y divide-gray-200">
+            //                     ${exercises.map(exercise => `
+            //                         <tr>
+            //                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${index + 1}</td> 
+            //                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${exercise.name}</td>
+            //                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${exercise.belt}</td>
+            //                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${exercise.type === 'uniform' ? 'Môn Phái' : 'Liên đoàn'}</td>
+            //                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            //                                 ${exercise.guide_url ? `<a href="${exercise.guide_url}" target="_blank" class="text-blue-600 hover:text-blue-900">Xem</a>` : 'N/A'}
+            //                             </td>
+            //                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium flex space-x-2">
+            //                                 <button class="edit-exercise-btn text-yellow-600 hover:text-yellow-900" data-id="${exercise.id}">Sửa</button>
+            //                                 <button class="delete-exercise-btn text-red-600 hover:text-red-900" data-id="${exercise.id}">Xóa</button>
+            //                             </td>
+            //                         </tr>
+            //                     `).join('')}
+            //                 </tbody>
+            //             </table>
+            //         </div>
+            //     `;
+            //     exerciseListContainer.innerHTML = tableHtml;
+            // }
+
+            async function editExercise(id) {
+                try {
+                    const response = await fetch(`${API_URL}?_action=get_single_exercise&id=${id}`);
+                    const result = await response.json();
+                    if (result.success) {
+                        const exercise = result.data;
+                        document.getElementById('exercise-id').value = exercise.id;
+                        document.getElementById('exercise-name').value = exercise.name;
+                        document.getElementById('exercise-belt').value = exercise.belt;
+                        document.getElementById('exercise-type').value = exercise.type;
+                        document.getElementById('exercise-url').value = exercise.guide_url || '';
+                        addExerciseButton.textContent = 'Lưu Thay Đổi';
+                        cancelExerciseButton.classList.remove('hidden');
+                    } else {
+                        showMessage("Lỗi", `Không tìm thấy bài tập: ${result.message}`);
+                    }
+                } catch (error) {
+                    showMessage("Lỗi", `Đã xảy ra lỗi khi lấy thông tin bài tập: ${error.message}`);
+                }
+            }
+
+            async function deleteExercise(id) {
+                if (!confirm("Bạn có chắc chắn muốn xóa bài tập này?")) return;
+                try {
+                    const data = new FormData();
+                    data.append('_action', 'delete_exercise');
+                    data.append('id', id);
+                    const response = await fetch(API_URL, { method: 'POST', body: data });
+                    const result = await response.json();
+                    if (result.success) {
+                        showMessage("Thành công", "Đã xóa bài tập.");
+                        // Thêm dòng này để cập nhật lại danh sách bài tập ngay lập tức
+                        fetchExercises();
+                    } else {
+                        showMessage("Lỗi", `Lỗi khi xóa bài tập: ${result.message}`);
+                    }
+                } catch (error) {
+                    showMessage("Lỗi", `Đã xảy ra lỗi khi xóa bài tập: ${error.message}`);
+                }
+            }
+
+            // --- CRUD for Students ---
             searchInput.addEventListener('input', () => {
                 const searchTerm = searchInput.value.toLowerCase();
                 const filteredStudents = allStudents.filter(student => {
@@ -1503,8 +2000,8 @@
 
                     if (result.success) {
                         showMessage("Thành công", "Đã xóa võ sinh.");
-                        fetchStudents();
-                        fetchFilterOptions();
+                        fetchStudents(); // Refresh data
+                        fetchFilterOptions(); // Refresh filter options
                     } else {
                         showMessage("Lỗi", `Đã xảy ra lỗi: ${result.message}`);
                     }
@@ -1513,6 +2010,7 @@
                     console.error("Error deleting student:", error);
                 }
             }
+
             function displayStudents(students) {
                 studentList.innerHTML = '';
                 if (students.length === 0) {
@@ -1522,7 +2020,7 @@
 
                 students.forEach((student, index) => {
                     const studentDiv = document.createElement('div');
-                    studentDiv.className = 'data-card bg-white p-4 rounded-lg shadow-md flex-col flex items-start space-y-4 transition-transform transform hover:scale-[1.01]';
+                    studentDiv.className = 'data-card bg-white p-4 rounded-lg shadow-md flex flex-col md:flex-row items-start md:items-center justify-between transition-transform transform hover:scale-[1.01]';
                     studentDiv.dataset.id = student.id;
                     const beltIcon = createBeltSVG(student.belt);
                     const crownIcon = student.status === 'Đã Nhập Môn' ? `<i class="fas fa-crown text-yellow-500 ml-2"></i>` : '';
@@ -1542,46 +2040,47 @@
                     const federationPromotionIcon = student.promotion_test_federation == 1 ? `<i class="fas fa-check-circle text-red-500" title="Đã đăng ký thi thăng đai Liên Đoàn"></i>` : '';
 
                     studentDiv.innerHTML = `
-                        <div class="flex-grow flex items-start space-x-4 w-full">
-                            <span class="text-lg font-bold text-gray-400 w-8 flex-shrink-0">${index + 1}.</span>
-                            <div class="student-photo-container">
-                                <img src="${student.photo_federation || 'https://placehold.co/64x64/e5e7eb/4b5563?text=N/A'}" alt="Ảnh thẻ liên đoàn" onerror="this.onerror=null;this.src='https://placehold.co/64x64/e5e7eb/4b5563?text=N/A'">
-                            </div>
-                            <div class="flex-grow">
-                                <h3 class="text-lg font-bold text-gray-800">${student.name} ${crownIcon}</h3>
-                                <p class="text-sm text-gray-600">
-                                    Mã: <span class="font-medium">${student.student_code || 'N/A'}</span>
-                                    | Tuổi: <span class="font-medium">${age}</span>
-                                </p>
-                                <p class="text-sm text-gray-600 mt-1">
-                                    Võ đường: <span class="font-medium">${student.club || 'N/A'}</span>
-                                </p>
-                                <div class="flex items-center space-x-4 mt-1">
-                                    <p class="text-sm text-gray-600 flex items-center space-x-2">
-                                        <span>Cấp đai:</span>
-                                        ${beltIcon}
-                                    </p>
-                                    <p class="text-sm text-gray-600 flex items-center space-x-2">
-                                        ${uniformPromotionIcon}
-                                        ${federationPromotionIcon}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="flex-shrink-0 flex items-center space-x-4 w-full justify-between">
-                            <div class="flex flex-col items-center">
-                                <div class="progress-container">
-                                    <div class="progress-fill" style="height: ${student.progress_percentage || 0}%;"></div>
-                                </div>
-                                <span class="mt-2 text-sm font-bold text-gray-700">${student.progress_percentage || 0}%</span>
-                                <span class="mt-1 text-xs text-gray-500">${student.completed_exercises || 0}/${student.total_exercises || 0}</span>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <button class="edit-button bg-yellow-500 text-white rounded-md px-4 py-2 font-medium hover:bg-yellow-600 transition-colors" data-id="${student.id}">Sửa</button>
-                                <button class="delete-button bg-red-500 text-white rounded-md px-4 py-2 font-medium hover:bg-red-600 transition-colors" data-id="${student.id}">Xóa</button>
-                            </div>
-                        </div>
-                    `;
+            <div class="flex-grow flex items-start space-x-4 mb-4 md:mb-0">
+    <span class="text-lg font-bold text-gray-400 w-8 flex-shrink-0">${index + 1}.</span>
+    <div class="student-photo-container">
+        <img src="${student.photo_federation || 'https://placehold.co/64x64/e5e7eb/4b5563?text=N/A'}" alt="Ảnh thẻ liên đoàn" onerror="this.onerror=null;this.src='https://placehold.co/64x64/e5e7eb/4b5563?text=N/A'">
+    </div>
+    <div>
+        <h3 class="text-lg font-bold text-gray-800">${student.name} ${crownIcon}</h3>
+        <p class="text-sm text-gray-600">
+            Mã: <span class="font-medium">${student.student_code || 'N/A'}</span>
+            | Tuổi: <span class="font-medium">${age}</span>
+        </p>
+        <p class="text-sm text-gray-600 mt-1">
+            Võ đường: <span class="font-medium">${student.club || 'N/A'}</span>
+        </p>
+        <div class="flex items-center space-x-4 mt-1">
+            <p class="text-sm text-gray-600 flex items-center space-x-2">
+                <span>Cấp đai:</span>
+                ${beltIcon}
+            </p>
+            <p class="text-sm text-gray-600 flex items-center space-x-2">
+                ${uniformPromotionIcon}
+                ${federationPromotionIcon}
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="flex-shrink-0 flex items-center space-x-4 w-full md:w-auto">
+    <div class="flex flex-col items-center">
+        <div class="progress-container">
+            <div class="progress-fill" style="height: ${student.progress_percentage || 0}%;"></div>
+        </div>
+        <span class="mt-2 text-sm font-bold text-gray-700">${student.progress_percentage || 0}%</span>
+        <span class="mt-1 text-xs text-gray-500">${student.completed_exercises || 0}/${student.total_exercises || 0}</span>
+    </div>
+    <div class="flex-shrink-0 flex flex-col space-y-2 w-1/2 md:w-auto">
+        <button class="edit-button bg-yellow-500 text-white rounded-md px-4 py-2 font-medium hover:bg-yellow-600 transition-colors" data-id="${student.id}">Sửa</button>
+        <button class="delete-button bg-red-500 text-white rounded-md px-4 py-2 font-medium hover:bg-red-600 transition-colors" data-id="${student.id}">Xóa</button>
+    </div>
+</div>
+        `;
                     studentList.appendChild(studentDiv);
                 });
 
