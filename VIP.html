@@ -587,7 +587,11 @@
                 </div>
                 <div class="col-span-1 md:col-span-2 mt-8">
                     <div id="progress-container-placeholder">
-                        <div class="col-span-1 md:col-span-2 flex justify-end mt-4">
+                        <div class="col-span-1 md:col-span-2 flex justify-end mt-4 space-x-2">
+                            <button type="button" id="back-to-list-button"
+                                class="px-6 py-2 rounded-md font-semibold text-gray-700 bg-gray-200 hover:bg-gray-300 transition-colors">
+                                Quay Lại Danh Sách
+                            </button>
                             <button type="button" id="save-progress-button"
                                 class="px-6 py-2 rounded-md font-semibold text-white bg-green-600 hover:bg-green-700 transition-colors">
                                 Lưu Tiến Độ
@@ -689,82 +693,88 @@
             const addExerciseButton = document.getElementById('add-exercise-button');
             const cancelExerciseButton = document.getElementById('cancel-exercise-button');
             const exerciseSearchInput = document.getElementById('exercise-search-input');
-
+            const backToListButton = document.getElementById('back-to-list-button');
             let allStudents = [];
             let allExercises = [];
             document.addEventListener('click', async (e) => {
-    if (e.target && e.target.id === 'save-progress-button') {
-        const studentId = document.getElementById('student-id').value;
-        const progressCheckboxes = document.querySelectorAll('#edit-exercise-progress-list .progress-checkbox');
-        let successfulUpdates = 0;
-        const updates = [];
+                if (e.target && e.target.id === 'save-progress-button') {
+                    const studentId = document.getElementById('student-id').value;
+                    const progressCheckboxes = document.querySelectorAll('#edit-exercise-progress-list .progress-checkbox');
+                    let successfulUpdates = 0;
+                    const updates = [];
 
-        for (const checkbox of progressCheckboxes) {
-            const exerciseId = checkbox.dataset.exerciseId;
-            const isCompleted = checkbox.checked;
+                    for (const checkbox of progressCheckboxes) {
+                        const exerciseId = checkbox.dataset.exerciseId;
+                        const isCompleted = checkbox.checked;
 
-            const data = new FormData();
-            data.append('_action', 'update_progress');
-            data.append('student_id', studentId);
-            data.append('exercise_id', exerciseId);
-            data.append('is_completed', isCompleted ? 1 : 0);
-            
-            updates.push(fetch(API_URL, {
-                method: 'POST',
-                body: data
-            }).then(response => response.json()));
-        }
-        
-        try {
-            const results = await Promise.all(updates);
-            let successfulUpdates = results.filter(r => r.success).length;
-            showMessage("Thành công", `Đã lưu thành công ${successfulUpdates} bài tập.`);
-        } catch (error) {
-            showMessage("Lỗi", `Đã xảy ra lỗi khi cập nhật tiến độ: ${error.message}`);
-        } finally {
-            // Tải lại tiến độ sau khi tất cả các yêu cầu đã hoàn tất
-            fetchStudentProgressForEdit(studentId, document.getElementById('student-belt').value);
-        }
-    }
-});
-            ///
-            document.addEventListener('click', async (e) => {
-    if (e.target && e.target.id === 'save-progress-button') {
-        const studentId = document.getElementById('student-id').value;
-        const progressCheckboxes = document.querySelectorAll('#edit-exercise-progress-list .progress-checkbox');
-        const completedExercises = [];
+                        const data = new FormData();
+                        data.append('_action', 'update_progress');
+                        data.append('student_id', studentId);
+                        data.append('exercise_id', exerciseId);
+                        data.append('is_completed', isCompleted ? 1 : 0);
 
-        for (const checkbox of progressCheckboxes) {
-            if (checkbox.checked) {
-                completedExercises.push(checkbox.dataset.exerciseId);
-            }
-        }
-        
-        const data = new FormData();
-        data.append('_action', 'update_all_progress');
-        data.append('student_id', studentId);
-        data.append('completed_exercises', JSON.stringify(completedExercises));
+                        updates.push(fetch(API_URL, {
+                            method: 'POST',
+                            body: data
+                        }).then(response => response.json()));
+                    }
 
-        try {
-            const response = await fetch(API_URL, {
-                method: 'POST',
-                body: data
+                    try {
+                        const results = await Promise.all(updates);
+                        let successfulUpdates = results.filter(r => r.success).length;
+                        showMessage("Thành công", `Đã lưu thành công ${successfulUpdates} bài tập.`);
+                    } catch (error) {
+                        showMessage("Lỗi", `Đã xảy ra lỗi khi cập nhật tiến độ: ${error.message}`);
+                    } finally {
+                        // Tải lại tiến độ sau khi tất cả các yêu cầu đã hoàn tất
+                        fetchStudentProgressForEdit(studentId, document.getElementById('student-belt').value);
+                    }
+                }
             });
-            const result = await response.json();
-            
-            if (result.success) {
-                showMessage("Thành công", `Đã lưu thành công tiến độ của võ sinh.`);
-            } else {
-                showMessage("Lỗi", `Cập nhật tiến độ bài tập thất bại: ${result.message}`);
-            }
-        } catch (error) {
-            showMessage("Lỗi", `Đã xảy ra lỗi khi cập nhật tiến độ: ${error}`);
-        } finally {
-            // Tải lại tiến độ để cập nhật "lọ nước"
-            fetchStudentProgressForEdit(studentId, document.getElementById('student-belt').value);
-        }
-    }
-});
+            ///
+            document.body.addEventListener('click', (e) => {
+                if (e.target.id === 'back-to-list-button') {
+                    fetchStudents();
+                    showSection('dashboard');
+                }
+            });
+            document.addEventListener('click', async (e) => {
+                if (e.target && e.target.id === 'save-progress-button') {
+                    const studentId = document.getElementById('student-id').value;
+                    const progressCheckboxes = document.querySelectorAll('#edit-exercise-progress-list .progress-checkbox');
+                    const completedExercises = [];
+
+                    for (const checkbox of progressCheckboxes) {
+                        if (checkbox.checked) {
+                            completedExercises.push(checkbox.dataset.exerciseId);
+                        }
+                    }
+
+                    const data = new FormData();
+                    data.append('_action', 'update_all_progress');
+                    data.append('student_id', studentId);
+                    data.append('completed_exercises', JSON.stringify(completedExercises));
+
+                    try {
+                        const response = await fetch(API_URL, {
+                            method: 'POST',
+                            body: data
+                        });
+                        const result = await response.json();
+
+                        if (result.success) {
+                            showMessage("Thành công", `Đã lưu thành công tiến độ của võ sinh.`);
+                        } else {
+                            showMessage("Lỗi", `Cập nhật tiến độ bài tập thất bại: ${result.message}`);
+                        }
+                    } catch (error) {
+                        showMessage("Lỗi", `Đã xảy ra lỗi khi cập nhật tiến độ: ${error}`);
+                    } finally {
+                        // Tải lại tiến độ để cập nhật "lọ nước"
+                        fetchStudentProgressForEdit(studentId, document.getElementById('student-belt').value);
+                    }
+                }
+            });
             // Thêm đoạn code này vào cuối phần khai báo biến trong window.onload
             exerciseSearchInput.addEventListener('input', () => {
                 const searchTerm = exerciseSearchInput.value.toLowerCase();
@@ -789,7 +799,7 @@
             //         deleteExercise(exerciseId);
             //     }
             // });
-            
+
             // Function to show custom modal message
             function showMessage(title, message) {
                 modalTitle.textContent = title;
@@ -1131,11 +1141,16 @@
                 </div>
             </div>
         </div>
-        <div class="col-span-1 md:col-span-2 flex justify-end mt-4">
-            <button type="button" id="save-progress-button" class="px-6 py-2 rounded-md font-semibold text-white bg-green-600 hover:bg-green-700 transition-colors">
-                Lưu Tiến Độ
-            </button>
-        </div>
+        <div class="col-span-1 md:col-span-2 flex justify-end mt-4 space-x-2">
+                            <button type="button" id="back-to-list-button"
+                                class="px-6 py-2 rounded-md font-semibold text-gray-700 bg-gray-200 hover:bg-gray-300 transition-colors">
+                                Quay Lại Danh Sách
+                            </button>
+                            <button type="button" id="save-progress-button"
+                                class="px-6 py-2 rounded-md font-semibold text-white bg-green-600 hover:bg-green-700 transition-colors">
+                                Lưu Tiến Độ
+                            </button>
+                        </div>
     `;
 
                 showSection('form');
@@ -1157,7 +1172,10 @@
                 document.querySelectorAll('img[id^="preview-"]').forEach(img => img.classList.add('hidden'));
                 showSection('dashboard');
             });
-
+            backToListButton.addEventListener('click', () => {
+                fetchStudents(); // Làm mới danh sách võ sinh
+                showSection('dashboard'); // Chuyển về màn hình danh sách
+            });
             // Show student details in modal
             function showStudentDetails(student) {
                 detailsContent.innerHTML = `
@@ -1674,11 +1692,16 @@
                     </div>
             </div>
         </div>
-        <div class="col-span-1 md:col-span-2 flex justify-end mt-4">
-    <button type="button" id="save-progress-button" class="px-6 py-2 rounded-md font-semibold text-white bg-green-600 hover:bg-green-700 transition-colors">
-        Lưu Tiến Độ
-    </button>
-</div>
+        <div class="col-span-1 md:col-span-2 flex justify-end mt-4 space-x-2">
+                            <button type="button" id="back-to-list-button"
+                                class="px-6 py-2 rounded-md font-semibold text-gray-700 bg-gray-200 hover:bg-gray-300 transition-colors">
+                                Quay Lại Danh Sách
+                            </button>
+                            <button type="button" id="save-progress-button"
+                                class="px-6 py-2 rounded-md font-semibold text-white bg-green-600 hover:bg-green-700 transition-colors">
+                                Lưu Tiến Độ
+                            </button>
+                        </div>
     `;
 
                 showSection('form');
