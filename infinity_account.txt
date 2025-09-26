@@ -1,0 +1,49 @@
+pqqbeta.lovestoblog.com
+Account Password: username: if0_40011866 - password: Jrq78TffMG1TJ
+
+
+
+URL: https://dash.infinityfree.com/accounts/if0_40011866
+
+https://php-myadmin.net/db_structure.php?db=if0_40011866_phatquangquyen_db 
+Link phpmyadmin
+
+
+$servername = "sql300.infinityfree.com";
+$username = "if0_40011866"; // Mặc định của XAMPP
+$password = "Jrq78TffMG1TJ"; // Mặc định của XAMPP
+$dbname = "if0_40011866_phatquangquyen_db"; // Tên database bạn sẽ tạo
+
+
+MySQL DB Name : if0_40011866_phatquangquyen_db
+
+MySQL User Name: if0_40011866
+
+MySQL Host Name: sql300.infinityfree.com
+
+
+ $conn->set_charset("utf8mb4");
+$stmt = $conn->prepare($sql);
+$stmt->set_charset("utf8mb4");
+
+
+https://gemini.google.com/app/e4df2b50299ffcde
+
+----
+
+pqqnt.lovestoblog.com
+
+if0_40027925_phatquangquyen_db
+sql204.infinityfree.com
+if0_40027925
+6Fd396Jb5gK
+
+
+-----
+pqqnbk.lovestoblog.com
+nfURdnSCIa
+if0_40027971
+if0_40027971_phatquangquyen_db
+sql301.infinityfree.com
+
+https://dash.infinityfree.com/accounts
