@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Môn Phái Phật Quang Quyền</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            color: #1a202c;
+            line-height: 1.6;
+        }
+        .hero-section {
+            background: linear-gradient(to bottom, rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url('https://images.pexels.com/photos/3408744/pexels-photo-3408744.jpeg') no-repeat center center/cover;
+            height: 60vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .btn-link {
+            transition: all 0.3s ease;
+        }
+        .btn-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <main>
+        <div class="hero-section">
+            <div class="flex items-center space-x-4 mb-4">
+                <i class="fas fa-hand-fist text-5xl text-yellow-400 animate-bounce"></i>
+                <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight">
+                    Môn Phái Phật Quang Quyền
+                </h1>
+            </div>
+            <p class="text-lg md:text-xl font-light mb-8 max-w-2xl">
+                Khiêm Nhu, Dũng Cảm
+            </p>
+        </div>
+
+        <section id="features" class="py-16 px-4">
+            <div class="container mx-auto">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <a href="http://localhost/gen1/attandance.html" class="btn-link bg-white p-6 rounded-lg shadow-md flex flex-col items-center text-center hover:bg-blue-100">
+                        <i class="fas fa-calendar-check text-4xl text-blue-600 mb-4"></i>
+                        <h3 class="text-xl font-semibold text-gray-800">Điểm Danh</h3>
+                    </a>
+                    <a href="http://localhost/gen1/mo2.html" class="btn-link bg-white p-6 rounded-lg shadow-md flex flex-col items-center text-center hover:bg-blue-100">
+                        <i class="fas fa-users-cog text-4xl text-blue-600 mb-4"></i>
+                        <h3 class="text-xl font-semibold text-gray-800">Quản Lý Võ Sinh</h3>
+                    </a>
+                    <a href="http://localhost/gen1/exam_list.html" class="btn-link bg-white p-6 rounded-lg shadow-md flex flex-col items-center text-center hover:bg-blue-100">
+                        <i class="fas fa-clipboard-list text-4xl text-blue-600 mb-4"></i>
+                        <h3 class="text-xl font-semibold text-gray-800">Đăng Ký Thi Đai</h3>
+                    </a>
+                    <a href="http://localhost/gen1/export_exam_list.html" class="btn-link bg-white p-6 rounded-lg shadow-md flex flex-col items-center text-center hover:bg-blue-100">
+                        <i class="fas fa-file-export text-4xl text-blue-600 mb-4"></i>
+                        <h3 class="text-xl font-semibold text-gray-800">Xuất Danh Sách Thi</h3>
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 text-white text-center py-6 px-4 mt-12">
+        <p>&copy; 2025 Môn Phái Phật Quang Quyền. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>
