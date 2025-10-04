@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh sách Võ sinh và in phiếu dự thi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+        }
+
+        /* CSS cho phiếu dự thi */
+        #exam-form {
+            font-family: 'Times New Roman', Times, serif;
+            padding: 20px;
+        }
+
+        #exam-form .header-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        #exam-form .header-text {
+            flex-grow: 1;
+            text-align: center;
+            line-height: 1.2;
+            margin-top: -85px
+        }
+
+        #exam-form .title {
+            text-align: center;
+            font-size: 16pt;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        #exam-form .info-section {
+            font-size: 14pt;
+            /* Tăng cỡ chữ */
+        }
+
+        #exam-form .info-section p {
+            margin: 5px 0;
+        }
+
+        #exam-form .info-row {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            /* Cho phép các mục tự động xuống dòng nếu cần */
+        }
+
+        #exam-form .info-item {
+            /* Tùy chỉnh khoảng cách giữa các mục */
+            padding-right: 20px;
+            margin-bottom: 5px;
+        }
+
+        #exam-form .photo-box {
+            width: 80px;
+            height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* Thay đổi này sẽ đẩy ảnh xuống */
+            margin-top: 60px;
+            /* Bạn có thể điều chỉnh giá trị này */
+            /* Thêm viền đen bao quanh */
+            border: 1px solid black;
+            margin-left: -7px;
+            /* Điều chỉnh giá trị này để thay đổi vị trí */
+        }
+
+        #exam-form .photo-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+/* 
+        #exam-form table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 12pt;
+            
+        }
+
+        #exam-form th,
+        #exam-form td {
+            border: 1px solid black;
+            padding: 5px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        #exam-form th {
+            background-color: #ffffff;
+            font-weight: normal;
+        }
+
+        #exam-form .sub-table-header th {
+            font-size: 8pt;
+        }
+
+        #exam-form .sub-table-body td {
+            font-size: 8pt;
+        } */
+
+        #exam-form .signature-section {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            text-align: center;
+            margin-top: 0px;
+            font-size: 12pt;
+        }
+
+        #exam-form .signature-box {
+            line-height: 1.5;
+        }
+
+        #diploma-image-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            min-height: 200px;
+        }
+
+        #diploma-image-container img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ccc;
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            max-width: 32rem;
+            width: 100%;
+            max-height: 90vh;
+            overflow: auto;
+            padding: 2rem;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 p-8">
+
+    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-6">
+        <h1 class="text-3xl font-bold text-center mb-6">Danh sách Võ sinh</h1>
+
+        <div id="student-list" class="space-y-4">
+            <p class="text-center text-gray-500">Đang tải danh sách...</p>
+        </div>
+    </div>
+
+    <div id="exam-form-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="flex justify-end mb-4">
+                <button id="close-modal" class="text-gray-500 hover:text-gray-700">&times;</button>
+            </div>
+            <div id="modal-content">
+            </div>
+            <div class="flex justify-center mt-6">
+                <button id="print-button"
+                    class="bg-blue-600 text-white px-6 py-2 rounded-md font-semibold hover:bg-blue-700 transition-colors">In</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="info-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="flex justify-end mb-4">
+                <button id="close-info-modal" class="text-gray-500 hover:text-gray-700">&times;</button>
+            </div>
+            <h2 class="text-2xl font-bold mb-4">Cập nhật thông tin võ sinh</h2>
+            <form id="update-info-form">
+                <input type="hidden" id="student-id-input" name="id">
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-bold mb-2">Cấp đai hiện tại:</label>
+                    <input type="text" id="belt-input" name="belt"
+                        class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-bold mb-2">Xin dự thi cấp:</label>
+                    <input type="text" id="registered-level-input" name="registered_level"
+                        class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-bold mb-2">Nơi sinh:</label>
+                    <input type="text" id="pob-input" name="pob"
+                        class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-bold mb-2">Chiều cao (cm):</label>
+                    <input type="number" id="height-cm-input" name="height_cm"
+                        class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-bold mb-2">Cân nặng (kg):</label>
+                    <input type="number" id="weight-kg-input" name="weight_kg"
+                        class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-bold mb-2">Link URL:</label>
+                    <input type="url" id="url-input" name="url"
+                        class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-bold mb-2">Ngày cấp:</label>
+                    <input type="date" id="federation-belt-date-input" name="federation_belt_date"
+                        class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-bold mb-2">Nơi cấp:</label>
+                    <input type="text" id="federation-belt-location-input" name="federation_belt_location"
+                        class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-bold mb-2">Cơ quan cấp:</label>
+                    <input type="text" id="federation-belt-authority-input" name="federation_belt_authority"
+                        class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="flex justify-end">
+                    <button type="submit"
+                        class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">Lưu thay
+                        đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'api.php';
+
+        async function fetchStudents() {
+            const studentList = document.getElementById('student-list');
+            studentList.innerHTML = '<p class="text-center text-gray-500">Đang tải danh sách...</p>';
+
+            try {
+                const response = await fetch(`${API_URL}?_action=read`);
+                const result = await response.json();
+
+                if (result.success && result.data.students.length > 0) {
+                    let html = '';
+                    result.data.students.forEach(student => {
+                        html += `
+                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg shadow-sm">
+                                <div class="flex items-center space-x-4">
+                                    <img src="${student.photo_federation || 'https://placehold.co/64x64?text=Ảnh'}" alt="Ảnh võ sinh" class="w-16 h-16 rounded-full object-cover">
+                                    <div>
+                                        <h3 class="text-lg font-semibold">${student.name}</h3>
+                                        <p class="text-sm text-gray-600">Mã VS: ${student.student_code}</p>
+                                    </div>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button class="update-info-btn bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors" data-student='${JSON.stringify(student)}'>
+                                        Cập nhật thông tin
+                                    </button>
+                                    <button class="print-exam-form-btn bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors" data-student='${JSON.stringify(student)}'>
+                                        In Phiếu Dự Thi
+                                    </button>
+                                    <button class="print-diploma-btn bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 transition-colors" data-student='${JSON.stringify(student)}'>
+                                        In Văn Bằng Môn Phái
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    studentList.innerHTML = html;
+                } else {
+                    studentList.innerHTML = '<p class="text-center text-gray-500">Không tìm thấy võ sinh nào.</p>';
+                }
+            } catch (error) {
+                studentList.innerHTML = '<p class="text-center text-red-500">Lỗi khi tải dữ liệu võ sinh.</p>';
+                console.error("Error fetching students:", error);
+            }
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) {
+                return 'Chưa cập nhật';
+            }
+            const parts = dateString.split('-');
+            if (parts.length === 3) {
+                return `${parts[2]}-${parts[1]}-${parts[0]}`;
+            }
+            return dateString;
+        }
+
+        function createExamFormTemplate2(studentData) {
+            return `
+            <div id="exam-form">
+                <div class="header-container">
+                    <div class="photo-box">
+                        <img src="${studentData.photo_federation || 'https://placehold.co/70x90?text=Ảnh'}" alt="Ảnh thẻ">
+                    </div>
+                    <div class="header-text">
+                        <p class="title">LIÊN ĐOÀN VÕ THUẬT CỔ TRUYỀN VIỆT NAM</p>
+                        <p class="title">PHẬT QUANG QUYỀN</p>
+                        <p class="title">PHIẾU ĐĂNG KÝ DỰ THI CÁ NHÂN</p>
+                    </div>
+                </div>
+
+                <div class="info-section">
+                    <div class="info-row">
+                        <div class="info-item"><b>Họ và tên:</b> ${studentData.name || 'Chưa cập nhật'}</div>
+                        <div class="info-item"><b>Năm sinh:</b> ${formatDate(studentData.dob)}</div>
+                        <div class="info-item"><b>Giới tính:</b> ${studentData.gender || 'Chưa cập nhật'}</div>
+                    </div>
+                    <p><b>Địa chỉ:</b> ${studentData.address || 'Chưa cập nhật'}</p>
+                    <p><b>Đơn vị:</b> ${studentData.club || 'Chưa cập nhật'}</p>
+                    <p><b>Văn bằng, chứng nhận đai, đẳng cấp đã có:</b> ${studentData.belt || 'Chưa cập nhật'}</p>
+                    <div class="info-row">
+                        <div class="info-item"><b>Ngày cấp:</b> ${formatDate(studentData.federation_belt_date) || 'Chưa cập nhật'}</div>
+                        <div class="info-item"><b>Nơi cấp:</b> ${studentData.federation_belt_location || 'Chưa cập nhật'}</div>
+                        <div class="info-item"><b>Cơ quan cấp:</b> ${studentData.federation_belt_authority || 'Chưa cập nhật'}</div>
+                    </div>
+                    
+                    <div class="info-row">
+                        <div class="info-item"><b>Trình độ văn hóa:</b> ${studentData.education_level || 'Chưa cập nhật'} </div>
+                        <div class="info-item"><b>Số điện thoại:</b> ${studentData.phone_number || 'Chưa cập nhật'}</div>
+                        <div class="info-item"><b>HLV bảo lãnh:</b> ${studentData.coach || 'Chưa cập nhật'}</div>
+                    </div>
+                    <p><b>Xin dự thi cấp:</b> ${studentData.registered_level || 'Chưa cập nhật'}</p>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 20%;">Nội dung thi</th>
+                            <th style="width: 25%;">Điểm</th>
+                            <th style="width: 25%;">Kết quả</th>
+                            <th style="width: 10%;">Ghi chú</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>- Tác phong</td><td></td><td></td><td></td></tr>
+                        <tr><td>- Quyền Quy Định</td><td></td><td></td><td></td></tr>
+                        <tr><td>- Quyền Môn Phái</td><td></td><td></td><td></td></tr>
+                        <tr><td>- Đối luyện</td><td></td><td></td><td></td></tr>
+                        <tr><td>- Tự vệ</td><td></td><td></td><td></td></tr>
+                        <tr><td>- Phản đòn căn bản</td><td></td><td></td><td></td></tr>
+                        <tr><td>- Song luyện</td><td></td><td></td><td></td></tr>
+                        <tr><td>- Đối kháng</td><td></td><td></td><td></td></tr>
+                        <tr>
+                            <td rowspan="2" style="font-weight: normal; vertical-align: middle;">- Thân pháp tổng hợp</td>
+                            <td colspan="2" style="padding: 0; border: none;">
+                                <table style="width: 100%; border-collapse: collapse; margin: 0; table-layout: fixed;">
+                                    <thead>
+                                        <tr>
+                                            <th style="border: 1px solid; width: 16.6%; font-size: 8pt; font-weight: normal; text-align: left; padding: 2px;">Phi ngư:</th>
+                                            <th style="border: 1px solid; width: 16.6%; font-size: 8pt; font-weight: normal; text-align: left; padding: 2px;">Lăn vai sau:</th>
+                                            <th style="border: 1px solid; width: 16.6%; font-size: 8pt; font-weight: normal; text-align: left; padding: 2px;">Té sấp:</th>
+                                            <th style="border: 1px solid; width: 16.6%; font-size: 8pt; font-weight: normal; text-align: left; padding: 2px;">Bật tôm:</th>
+                                            <th style="border: 16.6%; font-size: 6.4pt; font-weight: normal; text-align: left; padding: 2px;">Té nghiêng trái:</th>
+                                            <th style="border: 16.6%; font-size: 6.4pt; font-weight: normal; text-align: left; padding: 2px;">Té nghiêng phải:</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </td>
+                            <td rowspan="2" style="font-weight: bold; text-align: left; vertical-align: middle;">Điểm:</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" style="padding: 0; border: none;">
+                                <table style="width: 100%; border-collapse: collapse; margin: 0; table-layout: fixed;">
+                                    <tbody>
+                                        <tr>
+                                            <td style="border: 1px solid; width: 16.6%; font-size: 8pt; text-align: left; padding: 2px;">Té nổ:</td>
+                                            <td style="border: 1px solid; width: 16.6%; font-size: 8pt; text-align: left; padding: 2px;">Đá xoắn:</td>
+                                            <td style="border: 1px solid; width: 16.6%; font-size: 8pt; text-align: left; padding: 2px;">Đá lăn lưng:</td>
+                                            <td style="border: 16.6%; font-size: 8pt; text-align: left; padding: 2px;">Đá lăn bụng:</td>
+                                            <td style="border: 16.6%; font-size: 8pt; text-align: left; padding: 2px;">Lăn bánh xe:</td>
+                                            <td style="border: 16.6%; font-size: 8pt; text-align: left; padding: 2px;">Santo trước:</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight: normal; vertical-align: middle;">- Thể lực</td>
+                            <td colspan="2" style="padding: 0;">
+                                <table style="width: 100%; border-collapse: collapse; margin: 0; table-layout: fixed;">
+                                    <tr>
+                                        <td style="width: 50%; border: none; text-align: center; padding: 5px;">
+                                            <input type="checkbox" style="margin-right: 5px;"> Nhảy công lực
+                                        </td>
+                                        <td style="width: 50%; border: none; text-align: center; padding: 5px;">
+                                            <input type="checkbox" style="margin-right: 5px;"> Hít xà, đu xà
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>- Lý thuyết võ Đạo</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight: bold;">Tổng điểm</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p class="ntn" style="text-align: right; margin-top: 20px;">...........,Ngày ....... tháng ...... năm .......</p>
+                <div class="signature-section">
+                    <div class="signature-box">
+                        <p><b>Chủ tịch hội đồng thi</b></p>
+                        <p>(Ký và ghi rõ họ tên)</p>
+                    </div>
+                    <div class="signature-box">
+                        <p><b>Giám khảo</b></p>
+                        <p>(Ký và ghi rõ họ tên)</p>
+                    </div>
+                    <div class="signature-box">
+                        <p><b>Chữ ký HLV</b></p>
+                        <p>(Ký và ghi rõ họ tên)</p>
+                    </div>
+                    <div class="signature-box">
+                        <p><b>Chữ ký của thí sinh</b></p>
+                        <p>(Ký và ghi rõ họ tên)</p>
+                    </div>
+                </div>
+            </div>
+            `;
+        }
+
+        function createExamFormTemplate(studentData) {
+            return `
+    <div id="exam-form" class="font-['Times_New_Roman'] p-5">
+        <div class="flex items-center justify-between mb-5">
+            <div class="w-[80px] h-[100px] flex items-center justify-center mt-[60px] border border-black ml-[-7px]">
+                <img src="${studentData.photo_federation || 'https://placehold.co/70x90?text=Ảnh'}" alt="Ảnh thẻ" class="w-full h-full object-cover">
+            </div>
+            <div class="flex-grow text-center leading-tight mt-[-85px]">
+                <p class="text-[16pt] font-bold my-2">LIÊN ĐOÀN VÕ THUẬT CỔ TRUYỀN VIỆT NAM</p>
+                <p class="text-[16pt] font-bold my-2">PHẬT QUANG QUYỀN</p>
+                <p class="text-[16pt] font-bold my-2">PHIẾU ĐĂNG KÝ DỰ THI CÁ NHÂN</p>
+            </div>
+        </div>
+
+        <div class="info-section text-[14pt]">
+            <div class="flex justify-between flex-wrap">
+                <div class="pr-5 mb-1"><b>Họ và tên:</b> ${studentData.name || 'Chưa cập nhật'}</div>
+                <div class="pr-5 mb-1"><b>Năm sinh:</b> ${formatDate(studentData.dob)}</div>
+                <div class="pr-5 mb-1"><b>Giới tính:</b> ${studentData.gender || 'Chưa cập nhật'}</div>
+            </div>
+            <p class="my-1"><b>Địa chỉ:</b> ${studentData.address || 'Chưa cập nhật'}</p>
+            <p class="my-1"><b>Đơn vị:</b> ${studentData.club || 'Chưa cập nhật'}</p>
+            <p class="my-1"><b>Văn bằng, chứng nhận đai, đẳng cấp đã có:</b> ${studentData.belt || 'Chưa cập nhật'}</p>
+            <div class="flex justify-between flex-wrap">
+                <div class="pr-5 mb-1"><b>Ngày cấp:</b> ${formatDate(studentData.federation_belt_date) || 'Chưa cập nhật'}</div>
+                <div class="pr-5 mb-1"><b>Nơi cấp:</b> ${studentData.federation_belt_location || 'Chưa cập nhật'}</div>
+                <div class="pr-5 mb-1"><b>Cơ quan cấp:</b> ${studentData.federation_belt_authority || 'Chưa cập nhật'}</div>
+            </div>
+            
+            <div class="flex justify-between flex-wrap">
+                <div class="pr-5 mb-1"><b>Trình độ văn hóa:</b> ${studentData.education_level || 'Chưa cập nhật'} </div>
+                <div class="pr-5 mb-1"><b>Số điện thoại:</b> ${studentData.phone_number || 'Chưa cập nhật'}</div>
+                <div class="pr-5 mb-1"><b>HLV bảo lãnh:</b> ${studentData.coach || 'Chưa cập nhật'}</div>
+            </div>
+            <p><b>Xin dự thi cấp:</b> ${studentData.registered_level || 'Chưa cập nhật'}</p>
+        </div>
+
+        <table class="w-full border-collapse mt-5 text-[12pt]">
+            <thead>
+                <tr>
+                    <th class="border border-black p-1 text-left align-top w-[20%] font-normal">Nội dung thi</th>
+                    <th class="border border-black p-1 text-left align-top w-[25%]">Điểm</th>
+                    <th class="border border-black p-1 text-left align-top w-[25%]">Kết quả</th>
+                    <th class="border border-black p-1 text-left align-top w-[10%]">Ghi chú</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td class="border border-black p-1"> - Tác phong</td><td class="border border-black p-1"></td><td class="border border-black p-1"></td><td class="border border-black p-1"></td></tr>
+                <tr><td class="border border-black p-1"> - Quyền Quy Định</td><td class="border border-black p-1"></td><td class="border border-black p-1"></td><td class="border border-black p-1"></td></tr>
+                <tr><td class="border border-black p-1"> - Quyền Môn Phái</td><td class="border border-black p-1"></td><td class="border border-black p-1"></td><td class="border border-black p-1"></td></tr>
+                <tr><td class="border border-black p-1"> - Đối luyện</td><td class="border border-black p-1"></td><td class="border border-black p-1"></td><td class="border border-black p-1"></td></tr>
+                <tr><td class="border border-black p-1"> - Tự vệ</td><td class="border border-black p-1"></td><td class="border border-black p-1"></td><td class="border border-black p-1"></td></tr>
+                <tr><td class="border border-black p-1"> - Phản đòn căn bản</td><td class="border border-black p-1"></td><td class="border border-black p-1"></td><td class="border border-black p-1"></td></tr>
+                <tr><td class="border border-black p-1"> - Song luyện</td><td class="border border-black p-1"></td><td class="border border-black p-1"></td><td class="border border-black p-1"></td></tr>
+                <tr><td class="border border-black p-1"> - Đối kháng</td><td class="border border-black p-1"></td><td class="border border-black p-1"></td><td class="border border-black p-1"></td></tr>
+                <tr>
+                    <td rowspan="2" class="font-normal align-middle border border-black p-1"> - Thân pháp tổng hợp</td>
+                    <td colspan="2" class="p-0 border-none">
+                        <table class="w-full border-collapse m-0 table-fixed">
+                            <thead>
+                                <tr>
+                                    <th class="border-b border-black w-[16.6%] text-[8pt] font-normal text-left p-[2px]">Phi ngư:</th>
+                                    <th class="border-b border-s border-black w-[16.6%] text-[8pt] font-normal text-left p-[2px]">Lăn vai sau:</th>
+                                    <th class="border-b border-s border-black w-[16.6%] text-[8pt] font-normal text-left p-[2px]">Té sấp:</th>
+                                    <th class="border-b border-s border-black w-[16.6%] text-[8pt] font-normal text-left p-[2px]">Bật tôm:</th>
+                                    <th class="border-b border-s border-black w-[16.6%] text-[6.4pt] font-normal text-left p-[2px]">Té nghiêng trái:</th>
+                                    <th class="border-b border-s border-black w-[16.6%] text-[6.4pt] font-normal text-left p-[2px]">Té nghiêng phải:</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </td>
+                    <td rowspan="2" class="font-bold text-left align-middle border border-black p-1">Điểm:</td>
+                </tr>
+                <tr>
+                    <td colspan="2" class="p-0 border-none">
+                        <table class="w-full border-collapse m-0 table-fixed">
+                            <tbody>
+                                <tr>
+                                    <td class="border-e border-black w-[16.6%] text-[8pt] text-left p-[2px]">Té nổ:</td>
+                                    <td class="border-e border-black w-[16.6%] text-[8pt] text-left p-[2px]">Đá xoắn:</td>
+                                    <td class="border-e border-black w-[16.6%] text-[8pt] text-left p-[2px]">Đá lăn lưng:</td>
+                                    <td class="border-e border-black w-[16.6%] text-[8pt] text-left p-[2px]">Đá lăn bụng:</td>
+                                    <td class="border-e border-black w-[16.6%] text-[8pt] text-left p-[2px]">Lăn bánh xe:</td>
+                                    <td class="border-none border-black w-[16.6%] text-[8pt] text-left p-[2px]">Santo trước:</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="font-normal align-middle border border-black p-1"> - Thể lực</td>
+                    <td colspan="2" class="p-0 border border-black">
+                        <table class="w-full border-collapse m-0 table-fixed">
+                            <tr>
+                                <td class="w-1/2 border-none text-center p-[5px]">
+                                    <input type="checkbox" class="mr-[5px]"> Nhảy công lực
+                                </td>
+                                <td class="w-1/2 border-none text-center p-[5px]">
+                                    <input type="checkbox" class="mr-[5px]"> Hít xà, đu xà
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td class="border border-black p-1"></td>
+                </tr>
+                <tr>
+                    <td class="border border-black p-1"> - Lý thuyết võ Đạo</td>
+                    <td class="border border-black p-1"></td>
+                    <td class="border border-black p-1"></td>
+                    <td class="border border-black p-1"></td>
+                </tr>
+                <tr>
+                    <td class="font-bold border border-black p-1">Tổng điểm</td>
+                    <td class="border border-black p-1"></td>
+                    <td class="border border-black p-1"></td>
+                    <td class="border border-black p-1"></td>
+                </tr>
+            </tbody>
+        </table>
+        <p class="ntn text-right mt-5">...........,Ngày ....... tháng ...... năm .......</p>
+        <div class="grid grid-cols-4 text-center mt-0 text-[12pt]">
+            <div class="leading-relaxed">
+                <p><b>Chủ tịch hội đồng thi</b></p>
+                <p>(Ký và ghi rõ họ tên)</p>
+            </div>
+            <div class="leading-relaxed">
+                <p><b>Giám khảo</b></p>
+                <p>(Ký và ghi rõ họ tên)</p>
+            </div>
+            <div class="leading-relaxed">
+                <p><b>Chữ ký HLV</b></p>
+                <p>(Ký và ghi rõ họ tên)</p>
+            </div>
+            <div class="leading-relaxed">
+                <p><b>Chữ ký của thí sinh</b></p>
+                <p>(Ký và ghi rõ họ tên)</p>
+            </div>
+        </div>
+    </div>
+    `;
+        }
+
+        function showDiploma(studentData) {
+            const diplomaPath = studentData.diploma_uniform;
+            let contentHtml = '';
+
+            if (diplomaPath && diplomaPath !== '') {
+                contentHtml = `<div id="diploma-image-container"><img src="${diplomaPath}" alt="Văn bằng môn phái"></div>`;
+            } else {
+                contentHtml = `<p class="text-center text-red-500">Không có văn bằng môn phái cho võ sinh này.</p>`;
+            }
+
+            const modal = document.getElementById('exam-form-modal');
+            const content = document.getElementById('modal-content');
+
+            content.innerHTML = contentHtml;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function showInfoModal(studentData) {
+            const modal = document.getElementById('info-modal');
+
+            // Log giá trị để kiểm tra
+            console.log('Giá trị của studentData.belt là:', studentData.belt);
+
+            // Populate form fields with student data
+            document.getElementById('student-id-input').value = studentData.id;
+            document.getElementById('belt-input').value = studentData.belt || '';
+            document.getElementById('registered-level-input').value = studentData.registered_level || '';
+            document.getElementById('pob-input').value = studentData.pob || ''; // Thêm dòng này để điền dữ liệu nơi sinh
+            document.getElementById('height-cm-input').value = studentData.height_cm || '';
+            document.getElementById('weight-kg-input').value = studentData.weight_kg || '';
+            document.getElementById('url-input').value = studentData.url || '';
+            document.getElementById('federation-belt-date-input').value = studentData.federation_belt_date || '';
+            document.getElementById('federation-belt-location-input').value = studentData.federation_belt_location || '';
+            document.getElementById('federation-belt-authority-input').value = studentData.federation_belt_authority || '';
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        async function updateStudentInfo(event) {
+            event.preventDefault();
+
+            const form = document.getElementById('update-info-form');
+            const formData = new FormData(form);
+            formData.append('_action', 'update_student_info');
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    body: formData,
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('Cập nhật thông tin thành công!');
+                    document.getElementById('info-modal').classList.add('hidden');
+                    fetchStudents(); // Reload list to show changes
+                } else {
+                    alert('Lỗi: ' + result.message);
+                }
+            } catch (error) {
+                alert('Lỗi kết nối khi cập nhật thông tin.');
+                console.error('Error:', error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchStudents();
+
+            document.getElementById('student-list').addEventListener('click', (e) => {
+                const examBtn = e.target.closest('.print-exam-form-btn');
+                const diplomaBtn = e.target.closest('.print-diploma-btn');
+                const updateBtn = e.target.closest('.update-info-btn');
+                const studentData = JSON.parse(e.target.dataset.student);
+
+                if (examBtn) {
+                    const modal = document.getElementById('exam-form-modal');
+                    const content = document.getElementById('modal-content');
+                    content.innerHTML = createExamFormTemplate(studentData);
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                } else if (diplomaBtn) {
+                    showDiploma(studentData);
+                } else if (updateBtn) {
+                    showInfoModal(studentData);
+                }
+            });
+
+            document.getElementById('close-modal').addEventListener('click', () => {
+                const modal = document.getElementById('exam-form-modal');
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            });
+
+            document.getElementById('close-info-modal').addEventListener('click', () => {
+                const modal = document.getElementById('info-modal');
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            });
+
+            document.getElementById('update-info-form').addEventListener('submit', updateStudentInfo);
+
+            document.getElementById('print-button').addEventListener('click', () => {
+                const content = document.getElementById('modal-content');
+                const printWindow = window.open('', '', 'height=600,width=800');
+
+                printWindow.document.write('<html><head><title>Tài liệu</title>');
+
+                const styles = document.querySelectorAll('style, link[rel="stylesheet"]');
+                styles.forEach(style => {
+                    printWindow.document.head.appendChild(style.cloneNode(true));
+                });
+
+                printWindow.document.write('</head><body>');
+                printWindow.document.write(content.innerHTML);
+                printWindow.document.write('</body></html>');
+                printWindow.document.close();
+
+                printWindow.onload = () => {
+                    printWindow.print();
+                    printWindow.close();
+                };
+            });
+        });
+    </script>
+</body>
+
+</html>
